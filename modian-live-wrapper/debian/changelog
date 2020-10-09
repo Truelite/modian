@@ -1,4 +1,4 @@
-live-wrapper (0.8) UNRELEASED; urgency=medium
+modian-live-wrapper (0.8) UNRELEASED; urgency=medium
 
   [ Steve McIntyre ]
   * Add "-padding 0" to the xorriso command line to remove padding in the
