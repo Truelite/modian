@@ -1,0 +1,175 @@
+live-wrapper (0.8) UNRELEASED; urgency=medium
+
+  [ Steve McIntyre ]
+  * Add "-padding 0" to the xorriso command line to remove padding in the
+    ISO image, as suggested by Thomas Schmitt.
+
+ -- Steve McIntyre <93sam@debian.org>  Fri, 10 Nov 2017 00:09:25 +0000
+
+live-wrapper (0.7) unstable; urgency=medium
+
+  [ Steve McIntyre ]
+  * Add contrib and non-free components to apt config. Needed to allow for
+    building for images including firmware.
+  * Add command-line config for the apt-mirror (the mirror to be
+    configured inside the image), and change the default to use
+    deb.debian.org. Also switch the default build apt source to use
+    deb.debian.org
+  * Add command-line config for addition of firmware packages, and update
+    the docs about Customising Packages
+  * In the standard customise script, generate lists of the packages
+    installed in the image, and their sources. This needs a newer version
+    of vmdebootstrap, 1.7-1+nmu1 or higher, to add deb-src lines in
+    sources.list. Closes: #861070
+  * Change to how apt-ftparchive is called, so the installer will
+    work. This was part of the cause of #865015
+  * Tweak the size of the isolinux menu so long menus will display
+    better. This was the cause of #861421
+  * Add support for specifying the Volume ID of the output image.
+    Closes: #865384
+  * Set the mode of the ISO root dir to 0755 (rwxr-xr-x).
+    Closes: #865386
+  * Tweaks to the code for handling extra debs and udebs
+    + Separate downloading and creating metadata files
+    + Match the pool dir layout from the Debian archive more closely
+    + Add support for "base" debs
+    + Generate Packages and Release files separately for debs and udebs
+  * Add extra metadata to make d-i happy to install without network
+    This was part of the cause of #865015
+  * Fix up the root password in /etc/shadow so that the live installer
+    will set it properly. This is the cause of #866206
+  * Add myself to Uploaders
+  * Fix up usage of python-apt when there is more than one version of a
+    package available.
+  * When using base debs, add them to the sources list too.
+  * Add extra packages needed for braille and speech support.
+    Closes: #863177
+  * Ask pycurl to follow redirects when downloading. Closes: #862000
+  * Output the xorriso command line we're using into .disk/mkisofs, just
+    like on Debian installer images
+
+  [ Phil Wyett ]
+  * Various fixes for coding standards etc. Closes: #870845
+  * Update to standards version 4.0.0. Closes: #870846
+  * Add Suggests: live-wrapper-doc
+
+ -- Steve McIntyre <93sam@debian.org>  Sat, 05 Aug 2017 14:49:10 -0400
+
+live-wrapper (0.6+nmu2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Remove incorrect instance of converting to UTF-8.
+  * Eliminate 'pyversions' warnings at build time.
+  * Add 'python-requests' build dependency. Fixes docs build.
+  * Add 'squashfs-tools' dependency. (Closes: #867282).
+
+ -- Phil Wyett <philwyett@kathenas.org>  Fri, 14 Jul 2017 04:43:06 +0100
+
+live-wrapper (0.6+nmu1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Add a dependency on python-pycurl, needed by lwr (closes: #861994)
+  * Add Build-Depends: python-apt, python-cliapp, vmdebootstrap needed to
+    completely build the lwr autodoc
+
+ -- Florian Schlichting <fsfs@debian.org>  Tue, 16 May 2017 23:31:36 +0200
+
+live-wrapper (0.6) unstable; urgency=medium
+
+  [ Ana C. Custura ]
+  * Removed memtest86+ and HDT due to compatibility issues with EFI boot
+    (Closes: #813527, #846637)
+  * Added main menu title and submenu generation for bootloaders
+  * Added localised live boot options
+  * Added installer with speech synthesis boot option
+  * Fixed issues with graphical installer on isolinux boot (Closes: #846631)
+
+  [ Iain R. Learmonth ]
+  * lwr binary is now a generated entry point
+  * Added --di-daily to allow selection of d-i URLs for daily builds (Closes:
+    #846303)
+  * Documentation has been updated to show how to choose an alternative build
+    directory (Closes: #850763)
+  * Documentation updated to show how attach a USB device to QEMU (Closes:
+    #846632)
+  * python-distro-info is now used to resolve codenames to suites (Closes:
+    #846304)
+
+ -- Iain R. Learmonth <irl@debian.org>  Mon, 23 Jan 2017 02:39:31 +0000
+
+live-wrapper (0.5) unstable; urgency=medium
+
+  [ Iain R. Learmonth ]
+  * Core:
+   - Logging has seen some improvements
+   - Subdirectories within the CD root are now handled by a helper class
+  * Installer:
+   - Live image builds will now have installers by default
+   - Daily builds, not release builds, are now used (an option to select this
+     will appear in a future version)
+   - Packages and Release files are generated for the CD-ROM pool
+   - Hardcoded disk metadata (.disk) is added to enable the installer
+  * Live System:
+   - Default customise script fixes permissions on squashfs root (workaround
+     for #843983)
+   - systemd-networkd is no longer used in the live system
+  * Bootloaders:
+   - Bootloader files are only installed in the CD root when requested
+   - Bootloader configurations are now shared between ISOLINUX and GRUB
+
+  [ Ana C. Custura ]
+  * Utilities:
+   - memtest86+ can now be installed into the image through a command line flag
+   - Hardware Detection Tool can now be installed into the image through a
+     command line flag (not yet installed in the bootloader menu though)
+  * Bootloaders:
+   - Menu entries for booting memtest86+ and HDT exist in the abstract
+     configuration (though are not yet serialised to the configurations
+     written)
+   - The installer can now be launched from either bootloader, either text-mode
+     or graphical
+
+  Thanks to the sponsors of the vmdebootstrap sprint, where the majority of
+  these changes were made.
+
+ -- Iain R. Learmonth <irl@debian.org>  Wed, 16 Nov 2016 09:54:04 +0000
+
+live-wrapper (0.4) unstable; urgency=medium
+
+  [ Iain R. Learmonth ]
+  * Fixed discovery of the customization script (Closes: #831637)
+  * Now uses native xorriso options, not mkisofs compatibility (Closes: #831368)
+  * debian/control:
+   - Standards version updated to 3.9.8
+   - Vcs-Git and Vcs-Browser changes to use HTTPS URLs
+   - Added dependencies on xorriso and isolinux (Closes: #831367)
+   - vmdebootstrap dependency now handled by dh_python
+
+  [ Neil Williams ]
+  * Added cmdtest and yarns support
+  * Added support for downloading udebs
+  * Fixes to image build process
+  * Fixed isolinux paths and grub module loading
+
+ -- Iain R. Learmonth <irl@debian.org>  Sat, 22 Oct 2016 22:48:08 +0100
+
+live-wrapper (0.3) unstable; urgency=medium
+
+  * Fix handling of mirror selection for building the image.
+  * Using HTTP instead of FTP for fetching the D-I helpers.
+  * Use --apt-mirror not --mirror for vmdebootstrap.
+  * Documentation updates.
+
+ -- Iain R. Learmonth <irl@debian.org>  Wed, 25 May 2016 13:26:02 +0100
+
+live-wrapper (0.2) unstable; urgency=medium
+
+  * User documentation is now included.
+
+ -- Iain R. Learmonth <irl@debian.org>  Fri, 18 Dec 2015 11:12:58 +0000
+
+live-wrapper (0.1) unstable; urgency=medium
+
+  * Initial release. (Closes: #804315)
+
+ -- Iain R. Learmonth <irl@debian.org>  Sat, 21 Nov 2015 15:18:36 +0000

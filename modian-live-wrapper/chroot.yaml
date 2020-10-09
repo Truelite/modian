@@ -1,0 +1,14 @@
+---
+- hosts: all
+  roles:
+   - live
+  tasks:
+   - name: lock root user
+     user:
+       name: root
+       password: "!"
+   - name: mount /proc in fstab
+     lineinfile:
+       name: /etc/fstab
+       regexp: '^proc\s+'
+       line: 'proc /proc proc defaults 0 0'

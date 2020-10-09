@@ -1,0 +1,15 @@
+---
+ - name: install live packages
+   apt:
+     name: initramfs-tools,live-boot,live-config,sudo,acpid
+     state: present
+ - name: proper root directory permissions
+   file:
+     path: /
+     owner: root
+     group: root
+     mode: 0755
+ - name: blacklist bochs-drm
+   copy:
+     dest: /etc/modprobe.d/qemu-bochs-drm-blacklist.conf
+     content: "blacklist bochs-drm"
