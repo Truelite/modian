@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+export PYBUILD_NAME=modian-live-wrapper
+export PYBUILD_INSTALL_ARGS=--install-lib=/usr/share/modian-live-wrapper/ --install-scripts=/usr/share/modian-live-wrapper/
 %:
 	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
 
