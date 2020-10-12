@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # live-wrapper - Wrapper for vmdebootstrap to create live images
 # (C) Iain R. Learmonth 2015 <irl@debian.org>
