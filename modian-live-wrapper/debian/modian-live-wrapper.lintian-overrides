@@ -1,0 +1,2 @@
+# These are not really documentation files
+modian-live-wrapper: package-contains-documentation-outside-usr-share-doc usr/share/modian-live-wrapper/modian_live_wrapper-0.7.egg-info/*
