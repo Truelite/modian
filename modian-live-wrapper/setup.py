@@ -43,4 +43,9 @@ setup(
         'pycurl',
         'python-apt'
     ],
+    entry_points={
+        'console_scripts': [
+            'lwr = lwr.run:main',
+        ],
+    },
 )
