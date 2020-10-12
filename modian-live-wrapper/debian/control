@@ -22,6 +22,7 @@ Depends: ${misc:Depends},
          python3-distro-info,
          squashfs-tools,
          xorriso
+Recommends: ${python3:Recommends}
 Suggests: cmdtest,
           modian-live-wrapper-doc
 Description: Wrapper for vmdebootstrap for creating live images
