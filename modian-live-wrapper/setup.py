@@ -34,7 +34,6 @@ setup(
     packages=[
         'lwr',
     ],
-    scripts=["lwr.py"],
     package_data={
         'live-wrapper': ['README', 'COPYING'],
     },
