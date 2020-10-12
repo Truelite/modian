@@ -45,7 +45,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'lwr = lwr.run:main',
+            'modian-lwr = lwr.run:main',
         ],
     },
 )
