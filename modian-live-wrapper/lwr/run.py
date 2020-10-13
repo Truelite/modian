@@ -31,7 +31,7 @@ from lwr.base_system import BaseSystem
 from lwr.component import Component
 from lwr.codenames import Codenames
 
-__version__ = '0.7'
+__version__ = '0.8'
 
 
 def run_vmdebootstrap(args, dest):
