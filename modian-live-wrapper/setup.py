@@ -17,9 +17,9 @@ with open(path.join(here, 'VERSION')) as version_file:
 setup(
     name='modian-live-wrapper',
     version=version,
-    description='Create a Debian live image based on vmdebootstrap',
+    description='Create a Debian live image',
     author='Enrico Zini',
-    author_email='enrico@enricozini.org',
+    author_email='enrico@debian.org',
     url='',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -35,7 +35,7 @@ setup(
         'lwr',
     ],
     package_data={
-        'live-wrapper': ['README', 'COPYING'],
+        'live-wrapper': ['README.md', 'COPYING'],
     },
     install_requires=[
         'requests',

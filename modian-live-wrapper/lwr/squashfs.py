@@ -30,6 +30,9 @@ class Squashfs(Component):
             self.log.info("%s already exists: reusing it", suffixed)
             return
 
+        if not self.mksquashfs:
+            self.log.warn("mksquashfs not found: you may need to install squashfs-tools")
+
         with tempfile.NamedTemporaryFile(mode="wt") as fd:
             print("/proc", file=fd)
             print("/dev", file=fd)

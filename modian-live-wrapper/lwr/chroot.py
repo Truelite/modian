@@ -1,6 +1,8 @@
 import os
 import shlex
 import shutil
+import subprocess
+from contextlib import contextmanager
 from .component import Component
 from .debootstrap import Debootstrap
 from .ansible import Ansible
@@ -66,7 +68,8 @@ class Chroot(Component):
                 print(" ".join(shlex.quote(x) for x in args), file=fd)
             os.chmod(ansible_sh, 0o755)
 
-            res = self._run_ansible([ansible_sh])
+            with self.prepare_ansible_chroot(dest):
+                res = self._run_ansible([ansible_sh])
             if res.result != 0:
                 self.log.warn("Rerunning ansible to check what fails")
                 self._run_ansible([ansible_sh])
@@ -78,6 +81,14 @@ class Chroot(Component):
         ansible = Ansible()
         ansible.run_pretty(cmd)
         return ansible
+
+    @contextmanager
+    def prepare_ansible_chroot(self, dest):
+        subprocess.run(["mount", "-o", "ro", "-t", "proc", "none", os.path.abspath(os.path.join(dest, "proc"))], check=True)
+        try:
+            yield
+        finally:
+            subprocess.run(["umount", os.path.abspath(os.path.join(dest, "proc"))], check=True)
 
     def remove_udev_persistent_rules(self, dest):
         self.log.info('Removing udev persistent cd and net rules')
