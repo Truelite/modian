@@ -21,7 +21,8 @@ Depends: ${misc:Depends},
          isolinux,
          python3-distro-info,
          squashfs-tools,
-         xorriso
+         xorriso,
+         debootstrap,
 Recommends: ${python3:Recommends}
 Suggests: cmdtest,
           modian-live-wrapper-doc
