@@ -8,8 +8,4 @@ export PYBUILD_DESTDIR=debian/modian-live-wrapper
 #export PYBUILD_INSTALL_ARGS=--install-lib=/usr/share/modian-live-wrapper/
 
 %:
-	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
-
-override_dh_auto_build:
-	dh_auto_build
-	( cd doc && make html )
+	dh $@ --with python3 --buildsystem=pybuild

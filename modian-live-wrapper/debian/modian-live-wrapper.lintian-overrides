@@ -1,2 +1,2 @@
-# These are not really documentation files
-modian-live-wrapper: package-contains-documentation-outside-usr-share-doc usr/share/modian-live-wrapper/modian_live_wrapper-0.7.egg-info/*
+# The documentation should stay in its own directory
+modian-live-wrapper-doc: repeated-path-segment doc usr/share/doc/modian-live-wrapper/doc/
