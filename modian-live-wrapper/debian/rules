@@ -3,7 +3,9 @@
 export PYBUILD_NAME=modian-live-wrapper
 
 export PYBUILD_DESTDIR=debian/modian-live-wrapper
-export PYBUILD_INSTALL_ARGS=--install-lib=/usr/share/modian-live-wrapper/
+# this is not enough to have pybuild add the right PYTHONPATH, investigate
+# later on how to fix it.
+#export PYBUILD_INSTALL_ARGS=--install-lib=/usr/share/modian-live-wrapper/
 
 %:
 	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
