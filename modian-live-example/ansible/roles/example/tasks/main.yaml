@@ -1,0 +1,4 @@
+---
+- name: Placeholder task
+  debug:
+    msg: "Add your tasks for the role instead of this placeholder."

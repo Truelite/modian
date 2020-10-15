@@ -1,0 +1,8 @@
+---
+- hosts: all
+  roles:
+    - example
+  tasks:
+    - name: Placeholder task outside a role
+      debug:
+        msg: "Add your tasks here instead of this placeholder"
