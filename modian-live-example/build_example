@@ -2,13 +2,16 @@
 
 MLW_DEST=${MLW_DEST:-dest}
 MLW_ISO=${MLW_ISO:-modian-example.iso}
-MLW_MIRROR=${MLW_MIRROR:-https://cdn-fastly.deb.debian.org/debian}
+MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
 MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-modian-example}
 MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Example"}
 
-FILELOG=${MLW_DEST}//modian-example-$(date "+%Y%m%d_%H%M%S").log
+FILELOG=${MLW_DEST}/modian-example-$(date "+%Y%m%d_%H%M%S").log
 
-live-wrapper/lwr.py \
+mkdir -p ${MLW_DEST}
+mkdir -p build/chroot
+
+modian-lwr \
     --architecture=amd64 \
     -o ${MLW_DEST}/${MLW_ISO} \
     --distribution=buster \
