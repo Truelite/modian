@@ -8,7 +8,7 @@ Documentation index:
 
 * [Post-ansible fixups](doc/chroot-fixups.md)
 * [Build directories](doc/build-directories.md)
-* [Custom kernels](doc/custom-kernels.md)
+
 * [Package repositories](doc/repositories.md)
 * [Extra squashfs customizations](doc/customize-squashfs.md)
 * [Extra iso customizations](doc/customize-iso.md)
