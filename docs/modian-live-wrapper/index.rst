@@ -21,5 +21,5 @@ hooks, to cover cases that are beyond Ansible's reach.
    commandline
    ansible
    chroot-fixups
-
+   build-directories
    custom-kernels
