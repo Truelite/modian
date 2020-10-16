@@ -19,3 +19,4 @@ hooks, to cover cases that are beyond Ansible's reach.
 
    quickstart
    commandline
+   ansible

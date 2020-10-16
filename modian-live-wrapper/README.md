@@ -6,7 +6,6 @@ Debian-based live images for use with CDs, DVDs or USB sticks.
 
 Documentation index:
 
-* [Ansible usage](doc/ansible.md)
 * [Post-ansible fixups](doc/chroot-fixups.md)
 * [Build directories](doc/build-directories.md)
 * [Custom kernels](doc/custom-kernels.md)
