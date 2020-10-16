@@ -18,3 +18,4 @@ hooks, to cover cases that are beyond Ansible's reach.
    :caption: Contents:
 
    quickstart
+   commandline
