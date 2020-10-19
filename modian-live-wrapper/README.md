@@ -6,7 +6,6 @@ Debian-based live images for use with CDs, DVDs or USB sticks.
 
 Documentation index:
 
-* [Package repositories](doc/repositories.md)
 * [Extra squashfs customizations](doc/customize-squashfs.md)
 * [Extra iso customizations](doc/customize-iso.md)
 * [Bootloader customization](doc/bootloader.md)

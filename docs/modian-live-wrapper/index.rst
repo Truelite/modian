@@ -23,3 +23,4 @@ hooks, to cover cases that are beyond Ansible's reach.
    chroot-fixups
    build-directories
    custom-kernels
+   repositories
