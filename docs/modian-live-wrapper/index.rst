@@ -25,3 +25,4 @@ hooks, to cover cases that are beyond Ansible's reach.
    custom-kernels
    repositories
    customize-squashfs
+   customize-iso
