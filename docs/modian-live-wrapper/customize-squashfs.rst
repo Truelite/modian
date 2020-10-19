@@ -4,7 +4,7 @@
 
 You can use ``--customize-squashfs`` to run a command (usually a
 shellscript) just before ``mksquashfs`` is run, and after the
-:doc:`chroot-fixups>` are run.
+:doc:`chroot-fixups` are run.
 
 The command will be passed the absolute path of the chroot as the only
 argument.
