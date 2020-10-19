@@ -2,18 +2,19 @@
  Custom kernels
 ****************
 
-By default, ``live-wrapper`` installs during the initial ``debootstrap``
-step the default kernel package for the distribution it is building.
+By default, ``modian-live-wrapper`` installs during the initial
+``debootstrap`` step the default kernel package for the distribution it
+is building.
 
 If you want to install a different kernel, you can use the
-``--no-auto-kernel`` option to stop ``live-wrapper`` from installing a
-kernel by default, and then install a kernel of your choosing using the
-ansible playbooks.
+``--no-auto-kernel`` option to stop ``modian-live-wrapper`` from
+installing a kernel by default, and then install a kernel of your
+choosing using the ansible playbooks.
 
-``live-wrapper`` will set an ansible variable called ``kernel_package``
-to contain the name of the Linux kernel image for the current
-distribution and architecture (for example, ``linux-image-amd64``,
-``linux-image-armmp``, and so on).
+``modian-live-wrapper`` will set an ansible variable called
+``kernel_package`` to contain the name of the Linux kernel image for the
+current distribution and architecture (for example,
+``linux-image-amd64``, ``linux-image-armmp``, and so on).
 
 For example, this playbook snippet will build a live image using the
 kernel from ``stretch-backports``::

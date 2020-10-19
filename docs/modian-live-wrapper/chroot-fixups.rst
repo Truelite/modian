@@ -3,7 +3,7 @@
 *********************
 
 After ansible is run, and before the chroot is packed with mksquashfs,
-live-wrapper performs a few final fixups, that are listed here.
+modian-live-wrapper performs a few final fixups, that are listed here.
 
 For further customization of the squashfs, see :doc:`customize-squashfs`.
 
@@ -17,8 +17,9 @@ via ansible.
 Finalize the apt mirror
 =======================
 
-At this stage, live-wrapper removes the mirrors used only at build time,
-and sets up the mirrors that will be used in the final live image:
+At this stage, modian-live-wrapper removes the mirrors used only at
+build time, and sets up the mirrors that will be used in the final live
+image:
 
 * ``/etc/apt/sources.list`` is removed
 * ``/etc/apt/sources.list.d/inst-*`` files are removed

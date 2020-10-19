@@ -2,15 +2,15 @@
  Ansible usage
 ***************
 
-After creating a chroot system with debootstrap, live-wrapper uses
-ansible to customize it.
+After creating a chroot system with debootstrap, modian-live-wrapper
+uses ansible to customize it.
 
 You can choose the playbook using the ``--playbook`` option, which
-defaults to ``chroot.yaml``. The playbook provided with live-wrapper
-does some simple customization tasks.
+defaults to ``chroot.yaml``. The playbook provided with
+modian-live-wrapper does some simple customization tasks.
 
-live-wrapper passes some extra variables to ansible playbook, that you
-can use in your templates:
+modian-live-wrapper passes some extra variables to ansible playbook,
+that you can use in your templates:
 
 ``distribution``:
    value of the ``--distribution`` command line option
@@ -26,9 +26,9 @@ can use in your templates:
    name of the kernel image package for the current architecture (see
    :doc:`custom-kernels`)
 
-live-wrapper provides a ``live`` role in ``roles/live/tasks/main.yaml``
-that sets up a live system: you can add it to the roles in your custom
-playbook.
+modian-live-wrapper provides a ``live`` role in
+``roles/live/tasks/main.yaml`` that sets up a live system: you can add
+it to the roles in your custom playbook.
 
 Here are some example rules you can use in a custom playbook::
 

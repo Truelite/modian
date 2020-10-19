@@ -4,7 +4,7 @@
 
 .. code:: text
 
-   usage: lwr.py [-h] [--version] [--log-level LOG_LEVEL] [--log FILE]
+   usage: modian-lwr  [-h] [--version] [--log-level LOG_LEVEL] [--log FILE]
                  [--distribution NAME] [--architecture ARCH]
                  [--apt-mirror mirror_url]
                  [--apt-mirror-components main [contrib [..]]]
