@@ -25,7 +25,6 @@ Depends: ${misc:Depends},
          debootstrap,
 Recommends: ${python3:Recommends}
 Suggests: cmdtest,
-          modian-live-wrapper-doc
 Description: Wrapper for vmdebootstrap for creating live images
  live-wrapper is a wrapper around vmdebootstrap to install a live Debian
  system into an ISO image, which can be used by booting from optical media or a
@@ -35,20 +34,3 @@ Description: Wrapper for vmdebootstrap for creating live images
  .
  isolinux and grub2 bootloaders can be supported, depending on the distribution
  and the architecture.
-
-Package: modian-live-wrapper-doc
-Architecture: all
-Section: doc
-Depends: ${misc:Depends}, ${sphinxdoc:Depends}
-Description: Wrapper for vmdebootstrap for creating live images (Documentation)
- live-wrapper is a wrapper around vmdebootstrap to install a live Debian
- system into an ISO image, which can be used by booting from optical media or a
- USB device.
- .
- This is a fork of live-wrapper that removes the need for vmdebootstrap.
- .
- isolinux and grub2 bootloaders can be supported, depending on the distribution
- and the architecture.
- .
- This package contains documentation on using modian-live-wrapper to create
- live images.

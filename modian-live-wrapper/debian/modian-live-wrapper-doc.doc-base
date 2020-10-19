@@ -1,8 +1,0 @@
-Document: modian-live-wrapper
-Title: Modian Live Wrapper Documentation
-Abstract: This is the full documentation of modian-live-wrapper
-Section: Debian
-
-Format: HTML
-Index: /usr/share/doc/modian-live-wrapper/README.md
-Files: /usr/share/doc/modian-live-wrapper/doc/*.md
