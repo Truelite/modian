@@ -391,7 +391,13 @@ class LiveWrapper(Component):
             apt_udeb.clean_up_apt()
         print("Use the -cdrom option to test the image using qemu-system.")
 
-    def run(self):
+    def get_parser(self):
+        """
+        Get our argparse parser
+
+        This is split in a different function so that it can be used in
+        the documentation.
+        """
         parser = argparse.ArgumentParser(
                 formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                 description="Build a live Debian image")
@@ -399,6 +405,11 @@ class LiveWrapper(Component):
         parser.add_argument("--log-level", action="store", default="debug", help="log at LEVEL, one of debug, info, warning, error, critical, fatal")
         parser.add_argument("--log", action="store", default="stderr", metavar="FILE", help="write log entries to FILE. Special values: stderr, none")
         self.add_settings(parser)
+
+        return parser
+
+    def run(self):
+        parser = self.get_parser()
 
         self.args = parser.parse_args()
 
@@ -433,6 +444,10 @@ class LiveWrapper(Component):
         except Fail as e:
             print(e, file=sys.stderr)
             sys.exit(1)
+
+
+def get_parser():
+    return LiveWrapper(version=__version__).get_parser()
 
 
 def main():
