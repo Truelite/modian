@@ -4,10 +4,7 @@ live-wrapper is a tool initially produced by the [Debian Live
 Team](https://www.debian.org/devel/debian-live/) that can be used to create
 Debian-based live images for use with CDs, DVDs or USB sticks.
 
-Documentation index:
-
-* [Development tips](doc/devel-tips.md)
-
+Documentation is in the [mobian documentation](../docs/)
 
 ## This is a forked version
 

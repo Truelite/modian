@@ -27,3 +27,4 @@ hooks, to cover cases that are beyond Ansible's reach.
    customize-squashfs
    customize-iso
    bootloader
+   devel-tips
