@@ -57,7 +57,7 @@ class BaseSystem(Component):
         super().__init__()
         for k, v in kw.items():
             setattr(self, k, v)
-        self.packages.append("python")  # for ansible
+        self.packages.append("python3")  # for ansible
         self.packages.append("eatmydata")  # to run ansible under eatmydata
         self.packages = sorted(set(self.packages))
 
