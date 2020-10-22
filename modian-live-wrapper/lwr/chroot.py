@@ -48,7 +48,7 @@ class Chroot(Component):
             ansible_inventory = os.path.join(workdir, "inventory.ini")
             with open(ansible_inventory, "wt") as fd:
                 print("[live]", file=fd)
-                print("{} ansible_connection=chroot ansible_python_interpreter= python3 {}".format(
+                print("{} ansible_connection=chroot ansible_python_interpreter=python3 {}".format(
                         os.path.abspath(dest),
                         " ".join("{}={}".format(k, v) for k, v in vars.items())),
                       file=fd)
