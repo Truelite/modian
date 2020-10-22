@@ -29,7 +29,9 @@ class Ansible(Component):
         re_result = re.compile(r"^(?P<status>[^:]+): (?P<host>[^]]+)\](?:: FAILED!)?(?: => (?P<json>.+))?")
         re_recap = re.compile(r"^(?P<host>.+?)\s*:\s+ok=(?P<ok>\d+)\s+changed=(?P<changed>\d+)\s+unreachable=(?P<unreachable>\d+)\s+failed=(?P<failed>\d+)")
 
-        for line in res.stdout:
+        # Using ``line in res.stdout`` the stdout is split in too many
+        # places and becomes unparseable.
+        for line in res.stdout.readlines():
             if line and line[0].isspace():
                 continue
             line = line.strip()
