@@ -66,6 +66,7 @@ class Chroot(Component):
                 print("#!/bin/sh", file=fd)
                 print("set -xue", file=fd)
                 print("export ANSIBLE_CONFIG={}".format(shlex.quote(ansible_cfg)), file=fd)
+                print("export ANSIBLE_STDOUT_CALLBACK=json", file=fd)
                 print(" ".join(shlex.quote(x) for x in args), file=fd)
             os.chmod(ansible_sh, 0o755)
 
@@ -76,7 +77,7 @@ class Chroot(Component):
                 self._run_ansible([ansible_sh])
                 raise RuntimeError("ansible exited with result {}".format(res.result))
             else:
-                return res.changed == 0 and res.unreachable == 0 and self.failed == 0
+                return res.changed == 0 and res.unreachable == 0 and res.failed == 0
 
     def _run_ansible(self, cmd):
         ansible = Ansible()
