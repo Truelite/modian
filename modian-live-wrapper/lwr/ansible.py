@@ -1,4 +1,5 @@
 import re
+from __future__ import annotations
 import subprocess
 import json
 from .component import Component
