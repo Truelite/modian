@@ -2,7 +2,7 @@
  Modian Live-Wrapper
 #####################
 
-Modian-live-wrapper is a forn of `live-wrapper`_, originally developed
+Modian-live-wrapper is a fork of `live-wrapper`_, originally developed
 by the `Debian Live Team`_ which can be used to create Debian-based live
 images for use with CDs, DVDs or USB sticks.
 
