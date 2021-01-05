@@ -389,7 +389,7 @@ class LiveWrapper(Component):
         self.log.info("Removing temporary work directories...")
         if self.args.installer:
             apt_udeb.clean_up_apt()
-        print("Use the -cdrom option to test the image using qemu-system.")
+        print("If using qemu-system to test the image, use the -cdrom option.")
 
     def get_parser(self):
         """
