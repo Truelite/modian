@@ -1,7 +1,7 @@
 ---
  - name: install live packages
    apt:
-     name: initramfs-tools,live-boot,live-config,sudo,acpid
+     name: live-boot,live-config,acpid
      state: present
  - name: blacklist bochs-drm
    copy:
