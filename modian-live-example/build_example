@@ -1,17 +1,26 @@
 #!/bin/bash
 
+# to run this script you need to install the modian-live-wrapper generated from
+# the modian-live-wrapper directory in this repository.
+
+# If all dependencies are installed, you can also run this script using the
+# version of modian-lwr in this repository using the command:
+# [sudo] MODIAN_LWR=path/to/modian/modian-live-wrapper/lwr.py ./build_example
+
 MLW_DEST=${MLW_DEST:-dest}
 MLW_ISO=${MLW_ISO:-modian-example.iso}
 MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
 MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-modian-example}
 MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Example"}
 
+MODIAN_LWR=${MODIAN_LWR:-modian-lwr}
+
 FILELOG=${MLW_DEST}/modian-example-$(date "+%Y%m%d_%H%M%S").log
 
 mkdir -p ${MLW_DEST}
 mkdir -p build/chroot
 
-modian-lwr \
+$MODIAN_LWR \
     --architecture=amd64 \
     -o ${MLW_DEST}/${MLW_ISO} \
     --distribution=buster \
