@@ -30,7 +30,7 @@ $MODIAN_LWR \
     --volume-id="${MLW_ISO_VOLUME}" \
     --description="${MLW_DESCRIPTION}" \
     --playbook="ansible/chroot.yaml" \
-    --bootappend="consoleblank=0 debug" \
+    --bootappend="consoleblank=0" \
     --networkd \
     --boot-timeout=1 \
     --cache-dir=cache/ \
