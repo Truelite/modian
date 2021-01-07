@@ -20,6 +20,12 @@ FILELOG=${MLW_DEST}/modian-example-$(date "+%Y%m%d_%H%M%S").log
 mkdir -p ${MLW_DEST}
 mkdir -p build/chroot
 
+# For testing purposes, it can be useful to change the line
+# --bootappend="consoleblank=0" \
+# and add ``console=ttyS0 printk.devkmsg=on`` to see the console messages on
+# the serial console (i.e. in the host terminal when using qemu) or even
+# ``debug`` to see way more messages from the system.
+
 $MODIAN_LWR \
     --architecture=amd64 \
     -o ${MLW_DEST}/${MLW_ISO} \
