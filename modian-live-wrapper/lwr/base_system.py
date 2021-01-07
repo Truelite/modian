@@ -59,6 +59,7 @@ class BaseSystem(Component):
             setattr(self, k, v)
         self.packages.append("python3")  # for ansible
         self.packages.append("eatmydata")  # to run ansible under eatmydata
+        self.packages.append("live-boot")  # required for booting
         self.packages = sorted(set(self.packages))
 
     @property
