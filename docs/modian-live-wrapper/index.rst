@@ -18,6 +18,7 @@ hooks, to cover cases that are beyond Ansible's reach.
    :caption: Contents:
 
    quickstart
+   project
    commandline
    ansible
    chroot-fixups

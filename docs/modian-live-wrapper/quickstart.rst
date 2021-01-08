@@ -152,5 +152,5 @@ following to the QEMU invocation::
 Next Steps
 ==========
 
-To learn more about using live-wrapper, you can read the
-:doc:`commandline` or browse through the rest of the documentation.
+To learn more about using live-wrapper, you can read the documentation
+on :doc:`project` or browse through the rest of the documentation.
