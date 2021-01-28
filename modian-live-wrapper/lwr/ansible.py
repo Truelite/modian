@@ -33,20 +33,25 @@ class Ansible(Component):
             self.log.warn("ansible remarks: %s", stdout_lines.pop(0))
         stdout = "\n".join(stdout_lines)
 
-        results = json.loads(stdout)
-        for stats in results["stats"].values():
-            self.ok += stats["ok"]
-            self.changed += stats["changed"]
-            self.unreachable += stats["unreachable"]
-            self.failed += stats["failures"]
+        if stdout:
+            results = json.loads(stdout)
+            for stats in results["stats"].values():
+                self.ok += stats["ok"]
+                self.changed += stats["changed"]
+                self.unreachable += stats["unreachable"]
+                self.failed += stats["failures"]
 
-        for play in results["plays"]:
-            for task in play["tasks"]:
-                for host, result in task["hosts"].items():
-                    status = "ok"
-                    if result.get("failed"):
-                        status = "failed"
-                    yield TaskOutcome(host, task["task"]["name"], status, result)
+            for play in results["plays"]:
+                for task in play["tasks"]:
+                    for host, result in task["hosts"].items():
+                        status = "ok"
+                        if result.get("failed"):
+                            status = "failed"
+                        yield TaskOutcome(host, task["task"]["name"], status, result)
+        else:
+            self.log.warn("Ansible failed to start:")
+            self.log.warn(stderr)
+            yield TaskOutcome("", "", "failed", {'result': 'failed'})
 
         self.result = res.wait()
 
