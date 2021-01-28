@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - example
+    - ../modian-live-wrapper/roles/live
   tasks:
     - name: Placeholder task outside a role
       debug:

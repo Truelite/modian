@@ -28,7 +28,14 @@ that you can use in your templates:
 
 modian-live-wrapper provides a ``live`` role in
 ``roles/live/tasks/main.yaml`` that sets up a live system: you can add
-it to the roles in your custom playbook.
+it to the roles in your custom playbook by using a relative path, e.g.::
+
+   roles:
+     - example
+     - ../modian-live-wrapper/roles/live
+
+other roles, like ``example`` above are searched in the directory
+``roles`` where the playbook lives.
 
 Here are some example rules you can use in a custom playbook::
 
