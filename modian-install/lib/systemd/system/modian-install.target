@@ -1,0 +1,8 @@
+# Systemd target for first-install boots.
+
+[Unit]
+Description=First Install Target
+Documentation=man:systemd.special(7)
+Requires=modian-debug-shell.service modian-install.service modian-install-feedback.service ssh.service
+After=ssh.service
+AllowIsolate=yes

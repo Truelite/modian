@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# SETUP_DEVICE      
+# VERBOSE           'yes' to enable verbose output
+# GRUB_LINUX_ARGS   (optional) arguments to pass to grub's linux image
+# GRUB_INITRD_ARGS  (optional) arguments to pass to grub's initrd image
+#
+# do_partitions     Function that partitions target devices and creates file
+#                   systems
+# do_feedback       (optional) by default it gives feedback with beeps; redefine
+#                   to get a different feedback
+# do_install_target (optional) install this system on the target device. It has
+#                   one parameter which is the directory where the target
+#                   device is mounted. By default, it installs the
+#                   multiple-squashfs scenario
+#
+# PERSISTENZA
+# PERSIST_SIZE      Size of persistence data file (default: 2GiB)
+# PERSIST_FILE      Name of persistence data file
+
+if [ "$TEST_FIRST_INSTALL" = 1 ]
+then
+    # load from local directory
+    DATADIR=usr/share/modian-install
+else
+    # load from the systemwide installation
+    DATADIR=/usr/share/modian-install
+fi
+
+. $DATADIR/common.sh
+
+first_install_main()
+{
+    verbose "First Install"
+
+    # Clear the run information file
+    :> $RUN_INFO_FILE
+
+    # If we run first-install, use exec so we do not continue with the rest of live-config
+    # Run in a subshell so we can "set -e" without influencing the whole script
+    (
+        set -ue
+        . $DATADIR/config.sh
+        do_first_install
+    )
+
+    RES=$?
+
+    echo "RESULT=$RES" >> $RUN_INFO_FILE
+
+    sync
+
+    exit $RES
+}
+
+case "$1" in
+    detect)
+       detect_disks
+       ;;
+    feedback)
+       # Make sure that the pcspkr module is installed, so we can give feedback
+       modprobe pcspkr
+
+       # Disable terminal blanking so we keep seeing the output of what happened
+       setterm -blank 0
+
+       clear
+
+       do_feedback
+       ;;
+    install)
+       first_install_main
+       ;;
+    *)
+       echo "Usage: $0 detect|feedback|install" >&2
+       exit 1
+       ;;
+esac

@@ -1,0 +1,2 @@
+mklabel msdos
+mkpart primary 0% 100%

@@ -1,0 +1,5 @@
+mklabel msdos
+mkpart primary 0%    30GiB
+mkpart primary 30GiB 32GiB
+mkpart primary 32GiB 100%
+set 1 boot on

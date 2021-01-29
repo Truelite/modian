@@ -1,0 +1,17 @@
+#  Show modian first-install results
+
+[Unit]
+Description=Modian first-install results
+Documentation=man:sulogin(8)
+After=modian-install.service plymouth-start.service
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/root
+ExecStartPre=-/bin/plymouth quit
+ExecStart=-/usr/sbin/modian-install feedback
+Type=idle
+StandardInput=tty-force
+StandardOutput=inherit
+StandardError=inherit
+IgnoreSIGPIPE=no

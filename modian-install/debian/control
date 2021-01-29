@@ -1,0 +1,27 @@
+Source: modian-install
+Section: admin
+Priority: optional
+Maintainer: Truelite team <packages@truelite.it>
+Build-Depends: 
+ debhelper-compat (>= 11),
+ dh-systemd
+Standards-Version: 3.9.5
+
+Package: modian-install
+Section: admin
+Priority: required
+Architecture: all
+Depends: ${misc:Depends},
+         openssh-server,
+         grub-pc, grub-efi-amd64-bin, syslinux,
+         efibootmgr,
+         dosfstools, kbd,
+         kpartx, parted, gdisk, lvm2, python3-parted,
+	 bsdtar, beep, python3,
+Description: Modian installation procedures
+ This package contains:
+ .
+  - the first installation procedure run at boot to provision a new machine
+  - the installation procedure run at boot to rescue a machine that fails to
+    boot
+  - the system upgrade and rollback procedures

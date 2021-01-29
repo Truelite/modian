@@ -1,0 +1,339 @@
+#!/usr/bin/python3
+
+import logging
+import sys
+import os
+import re
+import shlex
+
+log = logging.getLogger()
+
+VERSION = "1.0"
+
+LABEL_ROOT = "##root##"
+LABEL_LOG = "##log##"
+LABEL_DATA = "##data##"
+LABEL_IMAGES = "##images##"
+LABEL_ESP = "##ESP##"  # Not really a disk label, but used to identify ESP partition
+
+
+class Fail(Exception):
+    """
+    Exception that gets caught to make the program exit with an error.
+
+    Use this as a kind of RuntimeError where the user input or system
+    configuration is likely to blame.
+    """
+    pass
+
+
+class Hardware:
+    def __init__(self, uefi=False):
+        self.uefi = uefi
+
+    def _read_sys_file(self, dev):
+        with open(dev, "rt") as fd:
+            return fd.read().strip()
+
+    def read_iso_volume_id(self, pathname):
+        with open(pathname, "rb") as fd:
+            fd.seek(0x8028)
+            return fd.read(32).decode("utf-8").strip()
+
+    def get_live_media_device(self):
+        live_media_re = re.compile(r"^/dev/(?P<dev>\S+)\d+ /run/live/medium iso9660")
+        with open("/proc/mounts", "rt") as fd:
+            for line in fd:
+                mo = live_media_re.match(line)
+                if mo:
+                    return mo.group("dev")
+        return None
+
+    def size(self, devname):
+        return int(self._read_sys_file("/sys/block/{}/size".format(devname)))
+
+    def desc(self, devname):
+        return self._read_sys_file("/sys/block/{}/device/model".format(devname))
+
+    def list_devices(self):
+        for name in os.listdir("/sys/block"):
+            #sd* sata disk
+            #nvme* NVM express disk
+            if not name.startswith("sd") and not name.startswith("nvme"):
+                continue
+            yield name
+
+    def list_partition_labels(self):
+        for name in os.listdir("/dev/disk/by-label"):
+            if name not in (LABEL_ROOT, LABEL_LOG, LABEL_DATA, LABEL_IMAGES):
+                continue
+            dest = os.path.abspath(os.readlink(os.path.join("/dev/disk/by-label", name)))
+            yield name, os.path.basename(dest)
+
+    def get_uefi_partition(self, name):
+        import parted
+        pdev = parted.getDevice("/dev/" + name)
+        pdisk = parted.newDisk(pdev)
+        if pdisk.type != "gpt":
+            log.error("device %s has partition table type %s instead of gpt", name, pdisk.type)
+            return None
+        for part in pdisk.partitions:
+            if part.getFlag(18):
+                log.info("Found ESP partition in %s", part.path)
+                return os.path.basename(part.path)
+        log.info("No ESP partition found in %s", name)
+        return None
+
+
+class Blockdev:
+    """
+    Information for a block device
+    """
+    def __init__(self, hardware, name):
+        # device name without /dev
+        self.name = name
+        # Size in 512 byte blocks
+        self.size = hardware.size(name)
+        # Description
+        self.desc = hardware.desc(name)
+
+    @property
+    def device(self):
+        return "/dev/{}".format(self.name)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def details(self):
+        return "{:,}GB, {}".format(
+            int(self.size * 512 / (1000*1000*1000)),
+            self.desc)
+
+    @classmethod
+    def list(cls, hardware):
+        """
+        List all sd* or nvme block devices, generating a sequence of Blockdev objects
+        """
+        for name in hardware.list_devices():
+            bd = cls(hardware, name)
+            log.debug("found device %s (%s)", bd.name, bd.details)
+            yield bd
+
+
+class Partition:
+    def __init__(self, disk, dev, label):
+        self.disk = disk
+        self.dev = dev
+        self.label = label
+
+    def __str__(self):
+        return self.dev
+
+
+class System:
+    def __init__(self, hardware):
+        self.hardware = hardware
+        self.blockdevs = {x.name: x for x in Blockdev.list(hardware)}
+        self.labels = dict(self.hardware.list_partition_labels())
+        self.disk_root = None
+        self.disk_img = None
+        self.disk_inst = None
+        self.partitions = {}
+
+    def _check_partition(self, label, disk):
+        dev = self.labels.get(label, None)
+        if dev is None:
+            log.debug("label %s not found", label)
+            return True
+        #remove the last char (partition number), example sda1 --> sda
+        disk_name = dev.rstrip("0123456789")
+        #if there is nvm disk i have to remove also p char at the end, example nvme1n1p1 --> nvme1n1 (doesn't exits sdp!!!) 
+        disk_name = disk_name.rstrip("p")
+        log.debug("found %s for %s on disk %s", dev, label, disk_name)
+        if disk_name != disk.name:
+            log.error("label %s found on disk %s instead of %s", label, disk_name, disk.name)
+            return False
+
+        part = Partition(disk, dev, label)
+        self.partitions[label] = part
+        return True
+
+    def _check_uefi_partition(self, disk):
+        dev = self.hardware.get_uefi_partition(disk.name)
+        if dev is None:
+            return True
+        part = Partition(disk, dev, LABEL_ESP)
+        self.partitions[LABEL_ESP] = part
+        return True
+
+    def _read_partition_labels(self):
+        ok = True
+        ok = self._check_partition(LABEL_ROOT, self.disk_root) and ok
+        ok = self._check_partition(LABEL_LOG, self.disk_root) and ok
+        ok = self._check_partition(LABEL_DATA, self.disk_root) and ok
+        if self.hardware.uefi:
+            ok = self._check_uefi_partition(self.disk_root) and ok
+        ok = self._check_partition(LABEL_IMAGES, self.disk_img) and ok
+        if not ok:
+            raise Fail("inconsistencies found with existing disk partitions")
+
+    def detect(self, uefi=False):
+        ok = True
+
+        live_media_dev_name = self.hardware.get_live_media_device()
+        if live_media_dev_name is None:
+            log.error("cannot found live media device mounted in /proc/mounts")
+            ok = False
+
+        devs = []
+        for bd in self.blockdevs.values():
+            if bd.name == live_media_dev_name:
+                self.disk_inst = bd
+                continue
+            devs.append(bd)
+
+        if self.disk_inst is None:
+            log.error("live install media device %r not found", live_media_dev_name)
+            ok = False
+        if len(devs) == 0:
+            log.info("No disk found");
+            ok = False
+        elif len(devs) == 1:
+            log.info("selected the only disk %s as the root device", devs[0].name)
+            self.disk_root = devs[0]
+        elif len(devs) > 2:
+            log.error("%d disks found, refusing to choose", len(devs))
+            ok = False
+        else:
+            # Try selecting the image device as the biggest one
+            devs.sort(key=lambda x: x.size)
+            if devs[0].size == devs[1].size:
+                devs.sort(key=lambda x: x.name)
+                self.disk_root = devs[0]
+                log.info("Selected %s as root, as the first name of the two", self.disk_root)
+                self.disk_img = devs[1]
+                log.info("Selected %s as image, as the second name of the two", self.disk_img)
+            else:
+                self.disk_root = devs[0]
+                log.info("Selected %s as root, as the smallest of two", self.disk_root)
+                self.disk_img = devs[1]
+                log.info("Selected %s as image, as the biggest of two", self.disk_img)
+
+        if not ok:
+            raise Fail("disk detection failed")
+
+        log.info("Root device: %s (%s)", self.disk_root.name, self.disk_root.details)
+        if self.disk_img is None:
+            log.info("Image device: not found")
+        else:
+            log.info("Image device: %s (%s)", self.disk_img.name, self.disk_img.details)
+        log.info("Installation media: %s (%s)", self.disk_inst.name, self.disk_inst.details)
+
+        self._read_partition_labels()
+        log.info("Partition %s: %s", LABEL_ROOT, self.partitions.get(LABEL_ROOT, None))
+        log.info("Partition %s: %s", LABEL_LOG, self.partitions.get(LABEL_LOG, None))
+        log.info("Partition %s: %s", LABEL_DATA, self.partitions.get(LABEL_DATA, None))
+        log.info("Partition %s: %s", LABEL_IMAGES, self.partitions.get(LABEL_IMAGES, None))
+        log.info("Partition %s: %s", LABEL_ESP, self.partitions.get(LABEL_ESP, None))
+
+    def compute_actions(self):
+        actions = []
+
+        # If the iso image volume name is "firstinstall", then we always run a
+        # first install
+        iso_volume_id = self.hardware.read_iso_volume_id(self.disk_inst.device)
+        log.debug("ISO volume id is '%s'", iso_volume_id)
+        if iso_volume_id == "firstinstall":
+            log.info("running a firstinstall key: force complete reinstall of the machine")
+            actions.append("clean_lvm_groups")
+            actions.append("setup_disk_root")
+            actions.append("setup_disk_images")
+        else:
+            missing = []
+            if LABEL_ROOT not in self.partitions:
+                missing.append(LABEL_ROOT)
+            if LABEL_LOG not in self.partitions:
+                missing.append(LABEL_LOG)
+            if LABEL_DATA not in self.partitions:
+                missing.append(LABEL_DATA)
+            if self.hardware.uefi and LABEL_ESP not in self.partitions:
+                missing.append(LABEL_ESP)
+
+            actions.append("clean_lvm_groups")
+            if not missing:
+                log.info("all partitions found in root disk")
+                # formatting / installing root and log
+                # leaving data intact
+                actions.append("format_part_root")
+                actions.append("format_part_log")
+                if self.hardware.uefi:
+                    actions.append("format_part_esp")
+            else:
+                log.info("partition(s) %s not found in root disk", " ".join(missing))
+                # first install of the root disk
+                actions.append("setup_disk_root")
+
+            if LABEL_IMAGES in self.partitions:
+                log.info("all partitions found images disk")
+            elif self.disk_img:
+                log.info("partition %s not found in images disk", LABEL_IMAGES)
+                #  first install of the images disk
+                actions.append("setup_disk_images")
+
+        log.info("computed actions: %s", " ".join(actions))
+
+        return actions
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Perform disk and partition detection for the modian first install scripts")
+    parser.add_argument("--version", action="version", version="$(prog)s {}".format(VERSION))
+    parser.add_argument("--debug", action="store_true", help="debugging output")
+    parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+    parser.add_argument("--uefi", action="store_true", help="UEFI system")
+
+    args = parser.parse_args()
+
+    if args.debug:
+        log_level = logging.DEBUG
+    elif args.verbose:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARN
+    logging.basicConfig(level=log_level, stream=sys.stderr, format="%(asctime)s %(levelname)s %(message)s")
+
+    hardware = Hardware(uefi=args.uefi)
+    system = System(hardware)
+    system.detect()
+
+    def print_env(k, v):
+        print("{}={}".format(k, shlex.quote(v)))
+
+    print_env("DISK_ROOT", system.disk_root.name)
+    if system.disk_img is not None:
+        print_env("DISK_IMG", system.disk_img.name)
+    else:
+        print_env("DISK_IMG", "")
+    print_env("DISK_INST", system.disk_inst.name)
+    if LABEL_ROOT in system.partitions:
+        print_env("PART_ROOT", system.partitions[LABEL_ROOT].dev)
+    if LABEL_LOG in system.partitions:
+        print_env("PART_LOG", system.partitions[LABEL_LOG].dev)
+    if LABEL_DATA in system.partitions:
+        print_env("PART_DATA", system.partitions[LABEL_DATA].dev)
+    if LABEL_IMAGES in system.partitions:
+        print_env("PART_IMAGES", system.partitions[LABEL_IMAGES].dev)
+    if LABEL_ESP in system.partitions:
+        print_env("PART_ESP", system.partitions[LABEL_ESP].dev)
+    print("ACTIONS={}".format(shlex.quote(" ".join(system.compute_actions()))))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Fail as e:
+        log.error("%s", e)
+        sys.exit(1)

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+getDiskNameFromPartition()
+{
+	#reomve last char if is a number
+	local diskname=$(echo $1 | sed -e "s/[0-9]$//")
+	#remove last char if is a p (for nvm disk partition
+	diskname=$(echo $diskname | sed -e "s/p$//")
+	echo $diskname
+}
+name=$1
+size=$(fdisk -l | grep "$name" | awk '{ print $5}')
+size=$(echo $size | sed -e "s/G$//")
+echo $size
