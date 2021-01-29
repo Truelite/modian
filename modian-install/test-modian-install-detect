@@ -5,6 +5,7 @@ import unittest
 
 def load_script(name):
     from importlib.machinery import SourceFileLoader
+
     return SourceFileLoader("detect", name).load_module()
 
 
@@ -46,11 +47,17 @@ class MockHardware:
 
 class TestDetect(unittest.TestCase):
     def test_same_size(self):
-        hardware = MockHardware(False, "test", {
-            "sda": {"size": 10, "desc": "desc-sda"},
-            "sdb": {"size": 10, "desc": "desc-sdb"},
-            "sdc": {"size": 10, "desc": "desc-sdc"},
-        }, "sdc", {detect.LABEL_ROOT: "sda1", detect.LABEL_IMAGES: "sdb1"})
+        hardware = MockHardware(
+            False,
+            "test",
+            {
+                "sda": {"size": 10, "desc": "desc-sda"},
+                "sdb": {"size": 10, "desc": "desc-sdb"},
+                "sdc": {"size": 10, "desc": "desc-sdc"},
+            },
+            "sdc",
+            {detect.LABEL_ROOT: "sda1", detect.LABEL_IMAGES: "sdb1"},
+        )
         system = detect.System(hardware)
         system.detect()
         self.assertEqual(system.disk_root.name, "sda")
@@ -58,23 +65,35 @@ class TestDetect(unittest.TestCase):
         self.assertEqual(system.disk_inst.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].disk.name, "sda")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].dev, "sda1")
-        self.assertEqual(system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT)
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].disk.name, "sdb")
+        self.assertEqual(
+            system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT
+        )
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].disk.name, "sdb"
+        )
         self.assertEqual(system.partitions[detect.LABEL_IMAGES].dev, "sdb1")
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES)
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES
+        )
         self.assertNotIn(detect.LABEL_LOG, system.partitions)
         self.assertNotIn(detect.LABEL_DATA, system.partitions)
         self.assertNotIn(detect.LABEL_ESP, system.partitions)
-        self.assertEqual(system.compute_actions(), [
-            'clean_lvm_groups', 'setup_disk_root'
-        ])
+        self.assertEqual(
+            system.compute_actions(), ['clean_lvm_groups', 'setup_disk_root']
+        )
 
     def test_different_size(self):
-        hardware = MockHardware(False, "test", {
-            "sda": {"size": 10, "desc": "desc-sda"},
-            "sdb": {"size": 20, "desc": "desc-sdb"},
-            "sdc": {"size": 10, "desc": "desc-sdc"},
-        }, "sda", {detect.LABEL_ROOT: "sdc1", detect.LABEL_IMAGES: "sdb1"})
+        hardware = MockHardware(
+            False,
+            "test",
+            {
+                "sda": {"size": 10, "desc": "desc-sda"},
+                "sdb": {"size": 20, "desc": "desc-sdb"},
+                "sdc": {"size": 10, "desc": "desc-sdc"},
+            },
+            "sda",
+            {detect.LABEL_ROOT: "sdc1", detect.LABEL_IMAGES: "sdb1"},
+        )
         system = detect.System(hardware)
         system.detect()
         self.assertEqual(system.disk_root.name, "sdc")
@@ -82,23 +101,40 @@ class TestDetect(unittest.TestCase):
         self.assertEqual(system.disk_inst.name, "sda")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].dev, "sdc1")
-        self.assertEqual(system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT)
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].disk.name, "sdb")
+        self.assertEqual(
+            system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT
+        )
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].disk.name, "sdb"
+        )
         self.assertEqual(system.partitions[detect.LABEL_IMAGES].dev, "sdb1")
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES)
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES
+        )
         self.assertNotIn(detect.LABEL_LOG, system.partitions)
         self.assertNotIn(detect.LABEL_DATA, system.partitions)
         self.assertNotIn(detect.LABEL_ESP, system.partitions)
-        self.assertEqual(system.compute_actions(), [
-            'clean_lvm_groups', 'setup_disk_root'
-        ])
+        self.assertEqual(
+            system.compute_actions(), ['clean_lvm_groups', 'setup_disk_root']
+        )
 
     def test_uefi_esp(self):
-        hardware = MockHardware(True, "test", {
-            "sda": {"size": 10, "desc": "desc-sda"},
-            "sdb": {"size": 20, "desc": "desc-sdb"},
-            "sdc": {"size": 10, "desc": "desc-sdc", "esp": "sdc4"},
-        }, "sda", {detect.LABEL_ROOT: "sdc1", detect.LABEL_IMAGES: "sdb1", detect.LABEL_LOG: "sdc2", detect.LABEL_DATA: "sdc3"})
+        hardware = MockHardware(
+            True,
+            "test",
+            {
+                "sda": {"size": 10, "desc": "desc-sda"},
+                "sdb": {"size": 20, "desc": "desc-sdb"},
+                "sdc": {"size": 10, "desc": "desc-sdc", "esp": "sdc4"},
+            },
+            "sda",
+            {
+                detect.LABEL_ROOT: "sdc1",
+                detect.LABEL_IMAGES: "sdb1",
+                detect.LABEL_LOG: "sdc2",
+                detect.LABEL_DATA: "sdc3",
+            },
+        )
         system = detect.System(hardware)
         system.detect()
         self.assertEqual(system.disk_root.name, "sdc")
@@ -106,29 +142,58 @@ class TestDetect(unittest.TestCase):
         self.assertEqual(system.disk_inst.name, "sda")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].dev, "sdc1")
-        self.assertEqual(system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT)
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].disk.name, "sdb")
+        self.assertEqual(
+            system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT
+        )
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].disk.name, "sdb"
+        )
         self.assertEqual(system.partitions[detect.LABEL_IMAGES].dev, "sdb1")
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES)
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES
+        )
         self.assertEqual(system.partitions[detect.LABEL_LOG].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_LOG].dev, "sdc2")
-        self.assertEqual(system.partitions[detect.LABEL_LOG].label, detect.LABEL_LOG)
+        self.assertEqual(
+            system.partitions[detect.LABEL_LOG].label, detect.LABEL_LOG
+        )
         self.assertEqual(system.partitions[detect.LABEL_DATA].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_DATA].dev, "sdc3")
-        self.assertEqual(system.partitions[detect.LABEL_DATA].label, detect.LABEL_DATA)
+        self.assertEqual(
+            system.partitions[detect.LABEL_DATA].label, detect.LABEL_DATA
+        )
         self.assertEqual(system.partitions[detect.LABEL_ESP].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_ESP].dev, "sdc4")
-        self.assertEqual(system.partitions[detect.LABEL_ESP].label, detect.LABEL_ESP)
-        self.assertEqual(system.compute_actions(), [
-            'clean_lvm_groups', 'format_part_root', 'format_part_log', 'format_part_esp',
-        ])
+        self.assertEqual(
+            system.partitions[detect.LABEL_ESP].label, detect.LABEL_ESP
+        )
+        self.assertEqual(
+            system.compute_actions(),
+            [
+                'clean_lvm_groups',
+                'format_part_root',
+                'format_part_log',
+                'format_part_esp',
+            ],
+        )
 
     def test_uefi_no_esp(self):
-        hardware = MockHardware(True, "test", {
-            "sda": {"size": 10, "desc": "desc-sda"},
-            "sdb": {"size": 20, "desc": "desc-sdb"},
-            "sdc": {"size": 10, "desc": "desc-sdc"},
-        }, "sda", {detect.LABEL_ROOT: "sdc1", detect.LABEL_IMAGES: "sdb1", detect.LABEL_LOG: "sdc2", detect.LABEL_DATA: "sdc3"})
+        hardware = MockHardware(
+            True,
+            "test",
+            {
+                "sda": {"size": 10, "desc": "desc-sda"},
+                "sdb": {"size": 20, "desc": "desc-sdb"},
+                "sdc": {"size": 10, "desc": "desc-sdc"},
+            },
+            "sda",
+            {
+                detect.LABEL_ROOT: "sdc1",
+                detect.LABEL_IMAGES: "sdb1",
+                detect.LABEL_LOG: "sdc2",
+                detect.LABEL_DATA: "sdc3",
+            },
+        )
         system = detect.System(hardware)
         system.detect()
         self.assertEqual(system.disk_root.name, "sdc")
@@ -136,20 +201,30 @@ class TestDetect(unittest.TestCase):
         self.assertEqual(system.disk_inst.name, "sda")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_ROOT].dev, "sdc1")
-        self.assertEqual(system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT)
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].disk.name, "sdb")
+        self.assertEqual(
+            system.partitions[detect.LABEL_ROOT].label, detect.LABEL_ROOT
+        )
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].disk.name, "sdb"
+        )
         self.assertEqual(system.partitions[detect.LABEL_IMAGES].dev, "sdb1")
-        self.assertEqual(system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES)
+        self.assertEqual(
+            system.partitions[detect.LABEL_IMAGES].label, detect.LABEL_IMAGES
+        )
         self.assertEqual(system.partitions[detect.LABEL_LOG].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_LOG].dev, "sdc2")
-        self.assertEqual(system.partitions[detect.LABEL_LOG].label, detect.LABEL_LOG)
+        self.assertEqual(
+            system.partitions[detect.LABEL_LOG].label, detect.LABEL_LOG
+        )
         self.assertEqual(system.partitions[detect.LABEL_DATA].disk.name, "sdc")
         self.assertEqual(system.partitions[detect.LABEL_DATA].dev, "sdc3")
-        self.assertEqual(system.partitions[detect.LABEL_DATA].label, detect.LABEL_DATA)
+        self.assertEqual(
+            system.partitions[detect.LABEL_DATA].label, detect.LABEL_DATA
+        )
         self.assertNotIn(detect.LABEL_ESP, system.partitions)
-        self.assertEqual(system.compute_actions(), [
-            'clean_lvm_groups', 'setup_disk_root'
-        ])
+        self.assertEqual(
+            system.compute_actions(), ['clean_lvm_groups', 'setup_disk_root']
+        )
 
 
 if __name__ == "__main__":

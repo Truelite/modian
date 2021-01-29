@@ -9,6 +9,7 @@ import shlex
 
 log = logging.getLogger()
 
+
 class Fail(Exception):
     """
     Exception that gets caught to make the program exit with an error.
@@ -16,29 +17,37 @@ class Fail(Exception):
     Use this as a kind of RuntimeError where the user input or system
     configuration is likely to blame.
     """
+
     pass
+
 
 def read_sys_file(dev):
     with open(dev, "rt") as fd:
         return fd.read().strip()
 
+
 def read_sys_flag(dev):
     return int(read_sys_file(dev)) != 0
+
 
 def read_iso_volume_id(pathname):
     with open(pathname, "rb") as fd:
         fd.seek(0x8028)
         return fd.read(32).decode("utf-8").strip()
 
+
 class Blockdev:
     """
     Information for a block device
     """
+
     def __init__(self, name):
         # device name without /dev
         self.name = name
         # bool on if the disk is a spinning disk
-        self.rotational = read_sys_flag("/sys/block/{}/queue/rotational".format(name))
+        self.rotational = read_sys_flag(
+            "/sys/block/{}/queue/rotational".format(name)
+        )
         # bool on if the disk is removable
         self.removable = read_sys_flag("/sys/block/{}/removable".format(name))
         # Size in 512 byte blocks
@@ -58,8 +67,9 @@ class Blockdev:
         return "{}, {}, {:,}GB, {}".format(
             "spinning" if self.rotational else "ssd",
             "removable" if self.removable else "nonremovable",
-            int(self.size * 512 / (1000*1000*1000)),
-            self.desc)
+            int(self.size * 512 / (1000 * 1000 * 1000)),
+            self.desc,
+        )
 
     @classmethod
     def list(cls):
@@ -67,7 +77,8 @@ class Blockdev:
         List all sd* block devices, generating a sequence of Blockdev objects
         """
         for name in os.listdir("/sys/block"):
-            if not name.startswith("sd"): continue
+            if not name.startswith("sd"):
+                continue
             bd = cls(name)
             log.debug("found device %s (%s)", bd.name, bd.details)
             yield bd
@@ -75,7 +86,7 @@ class Blockdev:
 
 class System:
     def __init__(self):
-        self.blockdevs = { x.name: x for x in Blockdev.list() }
+        self.blockdevs = {x.name: x for x in Blockdev.list()}
         self.disk_inst = None
         self.partitions = {}
 
@@ -93,7 +104,11 @@ class System:
 
         self.disk_inst = usbs[0]
 
-        log.info("Installation media: %s (%s)", self.disk_inst.name, self.disk_inst.details)
+        log.info(
+            "Installation media: %s (%s)",
+            self.disk_inst.name,
+            self.disk_inst.details,
+        )
 
     def _check_only_one(self, lst, name):
         if not lst:
@@ -101,17 +116,26 @@ class System:
             return False
 
         if len(lst) != 1:
-            log.error("found more than one %s device: %s", name, " ".join(str(x) for x in lst))
+            log.error(
+                "found more than one %s device: %s",
+                name,
+                " ".join(str(x) for x in lst),
+            )
 
         return True
 
     def inst_volID(self):
         print(read_iso_volume_id(self.disk_inst.device))
 
+
 import argparse
 
-parser = argparse.ArgumentParser(description="Perform disk detection for the modian first install device")
-parser.add_argument("--version", action="version", version="$(prog)s {}".format(VERSION))
+parser = argparse.ArgumentParser(
+    description="Perform disk detection for the modian first install device"
+)
+parser.add_argument(
+    "--version", action="version", version="$(prog)s {}".format(VERSION)
+)
 parser.add_argument("devices", nargs="*", help="block devices selected")
 
 args = parser.parse_args()

@@ -13,20 +13,24 @@ import sys
 import importlib
 from collections import defaultdict
 
+
 def load_script(name):
     from importlib.machinery import SourceFileLoader
+
     return SourceFileLoader("detect", name).load_module()
+
 
 detect = load_script("/usr/sbin/modian-install-detect")
 
 log = logging.getLogger(__name__)
 
-#---Persistenza---------------------------------------------
+# ---Persistenza---------------------------------------------
 # Dimensione file di persistenza
 PERSIST_SIZE = "1500MiB"
 PERSIST_SIZE_BIG = "3000MiB"
 # Nome del file di persistenza
 PERSIST_FILE = "persistence"
+
 
 @contextlib.contextmanager
 def cd(path):
@@ -46,13 +50,15 @@ class Installer:
         self.modian_release_name = args.modian_release_name
         self.dest = args.live_dir
         self.grub_cfg = os.path.join(self.dest, "boot/grub/grub.cfg")
-        self.inst_dir = os.path.join(self.dest, "live-" + self.modian_release_name)
+        self.inst_dir = os.path.join(
+            self.dest, "live-" + self.modian_release_name
+        )
         self.scriptVersion = "1.0"
         self.persistSize = PERSIST_SIZE
         self.numOfIso = 3
 
     def get_GiB_diskSize(self, diskName):
-        output = subprocess.check_output(["getDiskSizeGiB",str(diskName)])
+        output = subprocess.check_output(["getDiskSizeGiB", str(diskName)])
         size = "".join(i for i in str(output) if i in "0123456789")
         return size
 
@@ -61,33 +67,54 @@ class Installer:
         labels = dict(hardware.list_partition_labels())
         rootDiskBasePath = "/dev/"
         rootDiskPath = rootDiskBasePath + labels.get(detect.LABEL_ROOT)
-        log.info("Disco root: %s",rootDiskPath)   
+        log.info("Disco root: %s", rootDiskPath)
         size = self.get_GiB_diskSize(rootDiskPath)
-        log.info("Disco root: %s Size %s GiB",rootDiskPath,size)
-        if int(size) > self.get_Gib_partionTableForIsoLive() :
+        log.info("Disco root: %s Size %s GiB", rootDiskPath, size)
+        if int(size) > self.get_Gib_partionTableForIsoLive():
             self.numOfIso = 3
             self.persistSize = PERSIST_SIZE_BIG
-            log.info("Large partition detect, use extended parameter. NumOfIso: %s Persistent Size: %s",self.numOfIso,self.persistSize)
+            log.info(
+                "Large partition detect, use extended parameter. NumOfIso: %s Persistent Size: %s",
+                self.numOfIso,
+                self.persistSize,
+            )
 
     def get_Gib_partionTableForIsoLive(self):
-        fp = open("/usr/share/modian-install/systemdisk-bios-32G.parted","r");
-        fp.readline()   #first line doesn't care
+        fp = open("/usr/share/modian-install/systemdisk-bios-32G.parted", "r")
+        fp.readline()  # first line doesn't care
         line = fp.readline()
         lineArgs = line.strip().split()
-        size = int(lineArgs[3].replace('GiB',''))   
+        size = int(lineArgs[3].replace('GiB', ''))
         fp.close()
-        return size    
+        return size
 
     def is_uefi(self):
         res = subprocess.run(["efibootmgr"], stdout=subprocess.DEVNULL)
         return res.returncode == 0
 
     def build_persistence_file(self):
-        subprocess.run(["fallocate", "-l", PERSIST_SIZE, PERSIST_FILE], check=True)
-        subprocess.run(["mkfs.ext4", "-q", "-L", "##persistence##", "-q", "-F", PERSIST_FILE], check=True)
-        subprocess.run(["tune2fs", "-c", "0", "-i", "1m", PERSIST_FILE], check=True)
+        subprocess.run(
+            ["fallocate", "-l", PERSIST_SIZE, PERSIST_FILE], check=True
+        )
+        subprocess.run(
+            [
+                "mkfs.ext4",
+                "-q",
+                "-L",
+                "##persistence##",
+                "-q",
+                "-F",
+                PERSIST_FILE,
+            ],
+            check=True,
+        )
+        subprocess.run(
+            ["tune2fs", "-c", "0", "-i", "1m", PERSIST_FILE], check=True
+        )
         # Creo file configurazione
-        subprocess.run(["mount", "-o", "loop,rw", PERSIST_FILE, "/mnt"], check=True)
+        subprocess.run(
+            ["mount", "-o", "loop,rw", PERSIST_FILE, "/mnt"], check=True
+        )
         with open("/mnt/persistence.conf", "wt") as fd:
             print("/ union", file=fd)
         subprocess.run(["umount", "/mnt"], check=True)
@@ -102,14 +129,34 @@ class Installer:
         """
         log.info("%s: create installation directory", self.inst_dir)
         os.makedirs(self.inst_dir, exist_ok=True)
-        
+
         with cd(self.inst_dir):
-            log.info("%s: extracting system %s", self.inst_dir, self.modian_release_name)
-            subprocess.run(["bsdtar", "-xv", "--strip-components", "1", "-f", iso, "live"], check=True)
+            log.info(
+                "%s: extracting system %s",
+                self.inst_dir,
+                self.modian_release_name,
+            )
+            subprocess.run(
+                [
+                    "bsdtar",
+                    "-xv",
+                    "--strip-components",
+                    "1",
+                    "-f",
+                    iso,
+                    "live",
+                ],
+                check=True,
+            )
 
             if check_integrity:
-                log.info("%s: %s: checking integrity", self.inst_dir, iso) 
-                res = subprocess.run("bsdtar --to-stdout -x -f {} md5sum.txt | sed -nre 's,./live/,./,p' | md5sum --check --quiet".format(shlex.quote(iso)), shell=True)
+                log.info("%s: %s: checking integrity", self.inst_dir, iso)
+                res = subprocess.run(
+                    "bsdtar --to-stdout -x -f {} md5sum.txt | sed -nre 's,./live/,./,p' | md5sum --check --quiet".format(
+                        shlex.quote(iso)
+                    ),
+                    shell=True,
+                )
                 if res.returncode != 0:
                     log.error("%s: %s: corrupted image", self.inst_dir, iso)
                     sys.exit(1)
@@ -117,7 +164,9 @@ class Installer:
             log.info("%s: creating persistence file", self.inst_dir)
             self.build_persistence_file()
 
-            log.info("%s: mark that installation was successful", self.inst_dir)
+            log.info(
+                "%s: mark that installation was successful", self.inst_dir
+            )
             subprocess.run(["sync"], check=True)
             with open("install-successful", "wb") as fd:
                 pass
@@ -138,7 +187,8 @@ class Installer:
                 print("insmod efi_uga", file=fd)
             else:
                 print("insmod vbe", file=fd)
-            print("""
+            print(
+                """
 insmod font
 if loadfont /boot/grub/unicode.pf2
 then
@@ -149,15 +199,24 @@ then
 fi
 set timeout=1
 set default="Version {ver}"
-""".format(ver=self.modian_release_name), file=fd)
+""".format(
+                    ver=self.modian_release_name
+                ),
+                file=fd,
+            )
 
             versions = self.list_installed()
             for ver in versions[::-1]:
-                print("""
+                print(
+                    """
 menuentry "Version {ver}" {{
   linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 --
   initrd /live-{ver}/initrd.img
-}}""".format(ver=ver, hostname=socket.gethostname()), file=fd)
+}}""".format(
+                        ver=ver, hostname=socket.gethostname()
+                    ),
+                    file=fd,
+                )
 
         os.rename(self.grub_cfg + ".new", self.grub_cfg)
 
@@ -166,8 +225,11 @@ menuentry "Version {ver}" {{
         Removed unsuccessful installation attempts
         """
         for f in os.listdir(self.dest):
-            if not f.startswith("live-"): continue
-            if not os.path.exists(os.path.join(self.dest, f, "install-successful")):
+            if not f.startswith("live-"):
+                continue
+            if not os.path.exists(
+                os.path.join(self.dest, f, "install-successful")
+            ):
                 shutil.rmtree(os.path.join(self.dest, f))
 
     def list_installed(self):
@@ -176,17 +238,22 @@ menuentry "Version {ver}" {{
         """
         versions = []
         for f in os.listdir(self.dest):
-            if not f.startswith("live-"): continue
+            if not f.startswith("live-"):
+                continue
             versions.append(f[5:])
-        versions.sort(key=lambda x:os.path.getmtime(os.path.join(self.dest, "live-" + x)))
+        versions.sort(
+            key=lambda x: os.path.getmtime(
+                os.path.join(self.dest, "live-" + x)
+            )
+        )
         return versions
 
     def runRollback(self):
         log.info("Script version: %s", self.scriptVersion)
         log.info("Performing rollback: %s", self.modian_release_name)
-	
+
         versions = self.list_installed()
-	
+
         # "[4] Ordino le installazioni in ordine di priorita"
         cur_time = time.time()
         base_time = cur_time - len(versions) - 1
@@ -194,7 +261,7 @@ menuentry "Version {ver}" {{
             t = base_time + idx
             os.utime(os.path.join(self.dest, "live-" + v), times=(t, t))
         os.utime(self.inst_dir, times=(cur_time, cur_time))
-	
+
         # echo "[7] GRUB Upgrading to remove old unused images"
         self.rebuild_grub()
 
@@ -249,18 +316,39 @@ menuentry "Version {ver}" {{
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Perform disk and partition detection for the modian first install scripts")
-    parser.add_argument("--debug", action="store_true", help="debugging output")
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
-    parser.add_argument("--live-dir", action="store", default="/live/image/", help="directory where the target filesystem is mounted")
-    parser.add_argument("--no-check-integrity", action="store_false", dest="check_integrity", help="skip checking integrity of files extracted from iso image")
+    parser = argparse.ArgumentParser(
+        description="Perform disk and partition detection for the modian first install scripts"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="debugging output"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="verbose output"
+    )
+    parser.add_argument(
+        "--live-dir",
+        action="store",
+        default="/live/image/",
+        help="directory where the target filesystem is mounted",
+    )
+    parser.add_argument(
+        "--no-check-integrity",
+        action="store_false",
+        dest="check_integrity",
+        help="skip checking integrity of files extracted from iso image",
+    )
     parser.add_argument(
         "modian_release_name",
         metavar="modian_release_name",
         action="store",
-        help="version of the modian system in the iso"
+        help="version of the modian system in the iso",
     )
-    parser.add_argument("--isoimage", metavar="file.iso", action="store", help="ISO image to install")
+    parser.add_argument(
+        "--isoimage",
+        metavar="file.iso",
+        action="store",
+        help="ISO image to install",
+    )
 
     args = parser.parse_args()
 
@@ -270,11 +358,15 @@ def main():
         log_level = logging.INFO
     else:
         log_level = logging.WARN
-    logging.basicConfig(level=log_level, stream=sys.stderr, format="%(asctime)s %(levelname)s %(message)s")
-    
+    logging.basicConfig(
+        level=log_level,
+        stream=sys.stderr,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+
     installer = Installer(args)
     installer.max_num_of_iso_storage()
-    log.info("iso image: %s", args.isoimage);
+    log.info("iso image: %s", args.isoimage)
 
     if not args.isoimage:
         log.info("... %s ...", "rollback")

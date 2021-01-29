@@ -14,7 +14,9 @@ LABEL_ROOT = "##root##"
 LABEL_LOG = "##log##"
 LABEL_DATA = "##data##"
 LABEL_IMAGES = "##images##"
-LABEL_ESP = "##ESP##"  # Not really a disk label, but used to identify ESP partition
+LABEL_ESP = (
+    "##ESP##"  # Not really a disk label, but used to identify ESP partition
+)
 
 
 class Fail(Exception):
@@ -24,6 +26,7 @@ class Fail(Exception):
     Use this as a kind of RuntimeError where the user input or system
     configuration is likely to blame.
     """
+
     pass
 
 
@@ -41,7 +44,9 @@ class Hardware:
             return fd.read(32).decode("utf-8").strip()
 
     def get_live_media_device(self):
-        live_media_re = re.compile(r"^/dev/(?P<dev>\S+)\d+ /run/live/medium iso9660")
+        live_media_re = re.compile(
+            r"^/dev/(?P<dev>\S+)\d+ /run/live/medium iso9660"
+        )
         with open("/proc/mounts", "rt") as fd:
             for line in fd:
                 mo = live_media_re.match(line)
@@ -53,12 +58,14 @@ class Hardware:
         return int(self._read_sys_file("/sys/block/{}/size".format(devname)))
 
     def desc(self, devname):
-        return self._read_sys_file("/sys/block/{}/device/model".format(devname))
+        return self._read_sys_file(
+            "/sys/block/{}/device/model".format(devname)
+        )
 
     def list_devices(self):
         for name in os.listdir("/sys/block"):
-            #sd* sata disk
-            #nvme* NVM express disk
+            # sd* sata disk
+            # nvme* NVM express disk
             if not name.startswith("sd") and not name.startswith("nvme"):
                 continue
             yield name
@@ -67,15 +74,22 @@ class Hardware:
         for name in os.listdir("/dev/disk/by-label"):
             if name not in (LABEL_ROOT, LABEL_LOG, LABEL_DATA, LABEL_IMAGES):
                 continue
-            dest = os.path.abspath(os.readlink(os.path.join("/dev/disk/by-label", name)))
+            dest = os.path.abspath(
+                os.readlink(os.path.join("/dev/disk/by-label", name))
+            )
             yield name, os.path.basename(dest)
 
     def get_uefi_partition(self, name):
         import parted
+
         pdev = parted.getDevice("/dev/" + name)
         pdisk = parted.newDisk(pdev)
         if pdisk.type != "gpt":
-            log.error("device %s has partition table type %s instead of gpt", name, pdisk.type)
+            log.error(
+                "device %s has partition table type %s instead of gpt",
+                name,
+                pdisk.type,
+            )
             return None
         for part in pdisk.partitions:
             if part.getFlag(18):
@@ -89,6 +103,7 @@ class Blockdev:
     """
     Information for a block device
     """
+
     def __init__(self, hardware, name):
         # device name without /dev
         self.name = name
@@ -107,8 +122,8 @@ class Blockdev:
     @property
     def details(self):
         return "{:,}GB, {}".format(
-            int(self.size * 512 / (1000*1000*1000)),
-            self.desc)
+            int(self.size * 512 / (1000 * 1000 * 1000)), self.desc
+        )
 
     @classmethod
     def list(cls, hardware):
@@ -146,13 +161,18 @@ class System:
         if dev is None:
             log.debug("label %s not found", label)
             return True
-        #remove the last char (partition number), example sda1 --> sda
+        # remove the last char (partition number), example sda1 --> sda
         disk_name = dev.rstrip("0123456789")
-        #if there is nvm disk i have to remove also p char at the end, example nvme1n1p1 --> nvme1n1 (doesn't exits sdp!!!) 
+        # if there is nvm disk i have to remove also p char at the end, example nvme1n1p1 --> nvme1n1 (doesn't exits sdp!!!)
         disk_name = disk_name.rstrip("p")
         log.debug("found %s for %s on disk %s", dev, label, disk_name)
         if disk_name != disk.name:
-            log.error("label %s found on disk %s instead of %s", label, disk_name, disk.name)
+            log.error(
+                "label %s found on disk %s instead of %s",
+                label,
+                disk_name,
+                disk.name,
+            )
             return False
 
         part = Partition(disk, dev, label)
@@ -194,13 +214,17 @@ class System:
             devs.append(bd)
 
         if self.disk_inst is None:
-            log.error("live install media device %r not found", live_media_dev_name)
+            log.error(
+                "live install media device %r not found", live_media_dev_name
+            )
             ok = False
         if len(devs) == 0:
-            log.info("No disk found");
+            log.info("No disk found")
             ok = False
         elif len(devs) == 1:
-            log.info("selected the only disk %s as the root device", devs[0].name)
+            log.info(
+                "selected the only disk %s as the root device", devs[0].name
+            )
             self.disk_root = devs[0]
         elif len(devs) > 2:
             log.error("%d disks found, refusing to choose", len(devs))
@@ -211,31 +235,69 @@ class System:
             if devs[0].size == devs[1].size:
                 devs.sort(key=lambda x: x.name)
                 self.disk_root = devs[0]
-                log.info("Selected %s as root, as the first name of the two", self.disk_root)
+                log.info(
+                    "Selected %s as root, as the first name of the two",
+                    self.disk_root,
+                )
                 self.disk_img = devs[1]
-                log.info("Selected %s as image, as the second name of the two", self.disk_img)
+                log.info(
+                    "Selected %s as image, as the second name of the two",
+                    self.disk_img,
+                )
             else:
                 self.disk_root = devs[0]
-                log.info("Selected %s as root, as the smallest of two", self.disk_root)
+                log.info(
+                    "Selected %s as root, as the smallest of two",
+                    self.disk_root,
+                )
                 self.disk_img = devs[1]
-                log.info("Selected %s as image, as the biggest of two", self.disk_img)
+                log.info(
+                    "Selected %s as image, as the biggest of two",
+                    self.disk_img,
+                )
 
         if not ok:
             raise Fail("disk detection failed")
 
-        log.info("Root device: %s (%s)", self.disk_root.name, self.disk_root.details)
+        log.info(
+            "Root device: %s (%s)", self.disk_root.name, self.disk_root.details
+        )
         if self.disk_img is None:
             log.info("Image device: not found")
         else:
-            log.info("Image device: %s (%s)", self.disk_img.name, self.disk_img.details)
-        log.info("Installation media: %s (%s)", self.disk_inst.name, self.disk_inst.details)
+            log.info(
+                "Image device: %s (%s)",
+                self.disk_img.name,
+                self.disk_img.details,
+            )
+        log.info(
+            "Installation media: %s (%s)",
+            self.disk_inst.name,
+            self.disk_inst.details,
+        )
 
         self._read_partition_labels()
-        log.info("Partition %s: %s", LABEL_ROOT, self.partitions.get(LABEL_ROOT, None))
-        log.info("Partition %s: %s", LABEL_LOG, self.partitions.get(LABEL_LOG, None))
-        log.info("Partition %s: %s", LABEL_DATA, self.partitions.get(LABEL_DATA, None))
-        log.info("Partition %s: %s", LABEL_IMAGES, self.partitions.get(LABEL_IMAGES, None))
-        log.info("Partition %s: %s", LABEL_ESP, self.partitions.get(LABEL_ESP, None))
+        log.info(
+            "Partition %s: %s",
+            LABEL_ROOT,
+            self.partitions.get(LABEL_ROOT, None),
+        )
+        log.info(
+            "Partition %s: %s", LABEL_LOG, self.partitions.get(LABEL_LOG, None)
+        )
+        log.info(
+            "Partition %s: %s",
+            LABEL_DATA,
+            self.partitions.get(LABEL_DATA, None),
+        )
+        log.info(
+            "Partition %s: %s",
+            LABEL_IMAGES,
+            self.partitions.get(LABEL_IMAGES, None),
+        )
+        log.info(
+            "Partition %s: %s", LABEL_ESP, self.partitions.get(LABEL_ESP, None)
+        )
 
     def compute_actions(self):
         actions = []
@@ -270,7 +332,9 @@ class System:
                 if self.hardware.uefi:
                     actions.append("format_part_esp")
             else:
-                log.info("partition(s) %s not found in root disk", " ".join(missing))
+                log.info(
+                    "partition(s) %s not found in root disk", " ".join(missing)
+                )
                 # first install of the root disk
                 actions.append("setup_disk_root")
 
@@ -289,10 +353,18 @@ class System:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Perform disk and partition detection for the modian first install scripts")
-    parser.add_argument("--version", action="version", version="$(prog)s {}".format(VERSION))
-    parser.add_argument("--debug", action="store_true", help="debugging output")
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+    parser = argparse.ArgumentParser(
+        description="Perform disk and partition detection for the modian first install scripts"
+    )
+    parser.add_argument(
+        "--version", action="version", version="$(prog)s {}".format(VERSION)
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="debugging output"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="verbose output"
+    )
     parser.add_argument("--uefi", action="store_true", help="UEFI system")
 
     args = parser.parse_args()
@@ -303,7 +375,11 @@ def main():
         log_level = logging.INFO
     else:
         log_level = logging.WARN
-    logging.basicConfig(level=log_level, stream=sys.stderr, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=log_level,
+        stream=sys.stderr,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
 
     hardware = Hardware(uefi=args.uefi)
     system = System(hardware)
