@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Truelite team <packages@truelite.it>
 Build-Depends: 
- debhelper-compat (>= 11),
+ debhelper-compat (= 11),
  dh-systemd
 Standards-Version: 3.9.5
 
