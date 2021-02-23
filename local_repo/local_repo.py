@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import http.server
 import os
 import shutil
 
@@ -48,6 +49,11 @@ class Repo:
             'serve',
             help=_get_first_docstring_line(self.serve),
         )
+        s_parser.add_argument(
+            '--port', '-p',
+            default=8099,
+            help='port for the local repository (default: 8099)',
+        )
         s_parser.set_defaults(func=self.serve)
 
         return parser
@@ -79,6 +85,12 @@ class Repo:
         """
         Serve a reprepro repository
         """
+        os.chdir(args.directory)
+        httpd = http.server.HTTPServer(
+            ('', args.port),
+            http.server.SimpleHTTPRequestHandler,
+        )
+        httpd.serve_forever()
 
 
 if __name__ == '__main__':
