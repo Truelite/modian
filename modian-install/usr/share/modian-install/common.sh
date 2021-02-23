@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 # Library of functions used by modian's first-install procedure
 RUN_INFO_FILE=/root/modian-install-result
 
