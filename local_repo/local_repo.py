@@ -4,6 +4,7 @@ import argparse
 import http.server
 import os
 import shutil
+import subprocess
 
 
 def _get_first_docstring_line(obj):
@@ -44,6 +45,23 @@ class Repo:
         )
         c_parser.set_defaults(func=self.create)
 
+        # Add
+        a_parser = subparsers.add_parser(
+            'add-deb',
+            help=_get_first_docstring_line(self.add_deb),
+        )
+        a_parser.add_argument(
+            '--distro', '-d',
+            default='buster',
+            help='target distribution (default: buster)',
+        )
+        a_parser.add_argument(
+            'deb',
+            nargs='+',
+            help='.deb package(s) to add',
+        )
+        a_parser.set_defaults(func=self.add_deb)
+
         # Serve
         s_parser = subparsers.add_parser(
             'serve',
@@ -79,6 +97,24 @@ class Repo:
         shutil.copyfile(
             os.path.join(scriptdir, 'conf/options'),
             os.path.join(confdir, 'options'),
+        )
+
+    def add_deb(self, args):
+        """
+        Add a .deb to the reprepro repository
+        """
+        deb_files = []
+        for fname in args.deb:
+            deb_files.append(os.path.abspath(fname))
+        os.chdir(args.directory)
+        subprocess.run(
+            [
+                'reprepro',
+                '-b', '.',
+                'includedeb',
+                args.distro,
+                *deb_files,
+            ]
         )
 
     def serve(self, args):

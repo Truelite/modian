@@ -24,7 +24,7 @@ To create an apt repository in the directory ``repo``::
 
 To add a package to the repository::
 
-   ./local-repo.py add path/to/package.deb
+   ./local-repo.py add-deb path/to/package.deb
 
 To serve the apt repository on port 8099::
 
