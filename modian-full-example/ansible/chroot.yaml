@@ -1,0 +1,9 @@
+---
+- hosts: all
+  roles:
+    - full_example
+    - ../modian-live-wrapper/roles/live
+  tasks:
+    - name: Placeholder task outside a role
+      debug:
+        msg: "Add your tasks here instead of this placeholder"

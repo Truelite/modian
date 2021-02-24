@@ -10,6 +10,7 @@ Welcome to Modian's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   modian-full-example/index
    modian-live-wrapper/index
 
 

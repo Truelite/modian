@@ -1,0 +1,5 @@
+---
+- name: Install modian packages
+  apt:
+    name: modian-install
+    state: present

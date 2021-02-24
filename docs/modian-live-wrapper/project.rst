@@ -10,6 +10,9 @@ scripts that are required.
 A pretty minimal example is available in this repository as
 ``modian-live-example`` and is described in this document.
 
+A more complete example that includes modian features other than
+modian-lwr is documented under :doc:`../modian-full-example/index`.
+
 Directory structure
 ===================
 
