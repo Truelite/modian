@@ -2,6 +2,16 @@
  Development
 *************
 
+Building packages
+=================
+
+Most modian components include the needed configuration to build source
+and binary packages in their ``debian/`` subdirectory.
+
+Those packages can be built using any one of the systems commonly used
+to build debian packages; it is recommended to use a method that builds
+inside a clean chroot such as pbuilder/cowbuilder or sbuild.
+
 ``local-repo``
 ==============
 
