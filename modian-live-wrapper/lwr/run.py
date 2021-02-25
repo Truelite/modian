@@ -53,6 +53,7 @@ def run_vmdebootstrap(args, dest):
         "installed_mirror": args.apt_mirror,
         "installed_mirror_components": args.apt_mirror_components,
         "playbook": args.playbook,
+        "ansible_extra_vars": args.ansible_extra_vars,
         "networkd": args.networkd,
         "cache_dir": args.cache_dir,
         "customize_squashfs": args.customize_squashfs,
@@ -94,6 +95,13 @@ class LiveWrapper(Component):
                             help='Components to activate in the built image apt configuration')
         distro.add_argument("--playbook", action="store", metavar="file.yaml", default="chroot.yaml",
                             help='Ansible playbook to run to customize the system')
+        distro.add_argument(
+            "--ansible-extra-vars",
+            action="store",
+            metavar="vars.yaml",
+            default="extra_vars.yaml",
+            help='Extra variables passed to the ansible playbook',
+        )
         distro.add_argument("--networkd", action="store_true",
                             help='Enable systemd-networkd and systemd-resolved')
         distro.add_argument("--tasks", "-t", action="store", metavar='"task-TASK1 task-TASK2 ..."', default="",

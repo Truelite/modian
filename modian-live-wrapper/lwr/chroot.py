@@ -60,7 +60,14 @@ class Chroot(Component):
                 print("nocows = 1", file=fd)
                 print("inventory = {}".format(os.path.abspath(ansible_inventory)), file=fd)
 
-            args = [self.ansible_playbook, "-v", os.path.abspath(sysdesc.playbook)]
+            args = [
+                self.ansible_playbook,
+                "-v",
+                "-e", "@{}".format(
+                    os.path.abspath(sysdesc.ansible_extra_vars)
+                ),
+                os.path.abspath(sysdesc.playbook)
+            ]
             ansible_sh = os.path.join(workdir, "ansible.sh")
             with open(ansible_sh, "wt") as fd:
                 print("#!/bin/sh", file=fd)

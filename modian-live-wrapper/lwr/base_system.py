@@ -29,6 +29,9 @@ class BaseSystem(Component):
     # Ansible playbook used for customization
     playbook = "chroot.yaml"
 
+    # Extra variables passed to the ansible playbook
+    ansible_extra_vars = "extra_vars.yaml"
+
     # Packages to install in the chroot
     packages = []
 

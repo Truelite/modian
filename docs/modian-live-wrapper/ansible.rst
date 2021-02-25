@@ -6,8 +6,8 @@ After creating a chroot system with debootstrap, modian-live-wrapper
 uses ansible to customize it.
 
 You can choose the playbook using the ``--playbook`` option, which
-defaults to ``chroot.yaml``. The playbook provided with
-modian-live-wrapper does some simple customization tasks.
+defaults to ``chroot.yaml``, and a file of extra variables with the
+option ``--ansible-extra-vars``, defaulting to ``extra_vars.yaml``.
 
 modian-live-wrapper passes some extra variables to ansible playbook,
 that you can use in your templates:
