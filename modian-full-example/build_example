@@ -12,6 +12,7 @@ MLW_ISO=${MLW_ISO:-modian-full-example.iso}
 MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
 MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-modian-full-example}
 MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Full Example"}
+MLW_EXTRA_VARS=${MLW_EXTRA_VARS:-ansible/extra_vars.yaml}
 
 MODIAN_LWR=${MODIAN_LWR:-modian-lwr}
 
@@ -36,6 +37,7 @@ $MODIAN_LWR \
     --volume-id="${MLW_ISO_VOLUME}" \
     --description="${MLW_DESCRIPTION}" \
     --playbook="ansible/chroot.yaml" \
+    --ansible-extra-vars="${MLW_EXTRA_VARS}" \
     --bootappend="consoleblank=0" \
     --networkd \
     --boot-timeout=1 \

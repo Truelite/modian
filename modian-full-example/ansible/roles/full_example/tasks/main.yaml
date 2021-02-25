@@ -1,4 +1,8 @@
 ---
+- name: Add the modian repository
+  apt_repository:
+    repo: 'deb {{ modian_repo }} {{ distribution }} main'
+    state: present
 - name: Install modian packages
   apt:
     name: modian-install
