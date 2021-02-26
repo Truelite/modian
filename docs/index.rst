@@ -12,6 +12,7 @@ Welcome to Modian's documentation!
 
    modian-full-example/index
    modian-live-wrapper/index
+   modian-install/index
 
 
 
