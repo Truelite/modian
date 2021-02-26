@@ -20,3 +20,13 @@ version of the code, see :doc:`devel`.
 Building
 ========
 
+To build the iso for a modian project you need to run the building
+script, e.g.::
+
+   [sudo] ./build_example
+
+this will generate an iso with the name specified in the script, e.g.
+``dist/modian-full-example.iso``.
+
+See :doc:`../modian-live-wrapper/project` for more details on the
+building script and how it can be customized.

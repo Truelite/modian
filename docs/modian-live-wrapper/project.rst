@@ -43,6 +43,8 @@ when building the image and should not be stored.
    Most of the file names in this section are just suggestion and can be
    changed by setting the appropriate options in the build scripts.
 
+.. _build_script:
+
 Build script
 ============
 

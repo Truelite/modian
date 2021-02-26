@@ -39,3 +39,22 @@ To add a package to the repository::
 To serve the apt repository on port 8099::
 
    ./local-repo.py serve
+
+Temporary project customizations
+================================
+
+When building a project with the :samp:`build_{<project name>}` script
+you may want to change some parameters such as the apt mirror to use:
+see :ref:`build_script` for details on the available variables.
+
+Custom ansible variables
+------------------------
+
+``modian-lwr`` loads a yaml file with custom variables that are passed
+to ansible; this can be used to change further configurations when
+building from the git checkout during development.
+
+For example, in ``modian-full-example`` ansible uses a ``modian_repo``
+variable to configure a repository to get modian packages from, and the
+file ``ansible/extra_vars_in_place.yaml`` sets that variable to use the
+repository served by ``local_repo.py``.
