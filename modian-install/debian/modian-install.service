@@ -1,8 +1,8 @@
 [Unit]
 Description=Modian - System image installation and rescue procedure
+After=modian-debug-shell.service
 
 [Service]
 StandardOutput=journal+console
 ExecStart=-/usr/sbin/modian-install install
-After=modian-debug-shell.service
 Type=oneshot
