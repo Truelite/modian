@@ -47,6 +47,13 @@ When building a project with the :samp:`build_{<project name>}` script
 you may want to change some parameters such as the apt mirror to use:
 see :ref:`build_script` for details on the available variables.
 
+To run lwr in-place, getting the packages from local-repo, you may want
+to run the script as::
+
+   [sudo] MODIAN_LWR=path/to/modian/modian-live-wrapper/lwr.py \
+          MLW_EXTRA_VARS=ansible/extra_vars_in_place.yaml \
+          ./build_example
+
 Custom ansible variables
 ------------------------
 
