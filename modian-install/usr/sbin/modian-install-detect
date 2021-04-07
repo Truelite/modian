@@ -45,13 +45,19 @@ class Hardware:
 
     def get_live_media_device(self):
         live_media_re = re.compile(
-            r"^/dev/(?P<dev>\S+)\d+ /run/live/medium iso9660"
+            r"^/dev/(?P<dev>\S+) /run/live/medium iso9660"
         )
         with open("/proc/mounts", "rt") as fd:
             for line in fd:
                 mo = live_media_re.match(line)
                 if mo:
-                    return mo.group("dev")
+                    devname = mo.group("dev")
+                    # the live media device can be a full device or a
+                    # partition; either way we select the relevant block
+                    # device from /sys/block/
+                    for b_dev in os.listdir('/sys/block/'):
+                        if devname.startswith(b_dev):
+                            return b_dev
         return None
 
     def size(self, devname):
