@@ -17,6 +17,8 @@
 # PERSIST_FILE      Nome del file di persistenza
 
 GRUBCFG=/mnt/boot/grub/grub.cfg
+# Set the following two variables to a sensible value in the ansible script
+# that generates the target chroot.
 MODIAN_RELEASE_NAME="<modian_release_name>"
 MODIAN_RELEASE_FULL_NAME='<modian_release_full_name>'
 HOSTNAME=$(hostname)

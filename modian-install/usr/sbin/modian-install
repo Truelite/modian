@@ -22,9 +22,11 @@ if [ "$TEST_FIRST_INSTALL" = 1 ]
 then
     # load from local directory
     DATADIR=usr/share/modian-install
+    ETCDIR=etc/modian
 else
     # load from the systemwide installation
     DATADIR=/usr/share/modian-install
+    ETCDIR=/etc/modian
 fi
 
 . $DATADIR/common.sh
@@ -40,7 +42,7 @@ first_install_main()
     # Run in a subshell so we can "set -e" without influencing the whole script
     (
         set -ue
-        . $DATADIR/config.sh
+        . $ETCDIR/config.sh
         do_first_install
     )
 
