@@ -14,7 +14,7 @@ if [ ! -e live_test.qcow2 ] ; then
     qemu-img create -f qcow2 live_test.qcow2 40G
 fi
 
-bsdtar xf "$ISO" live/vmlinuz live/initrd.img
+bsdtar xf "$ISO" live/vmlinuz* live/initrd.img*
 
 # To add custom kernel parameters we should pass a kernel to qemu and add 
 # -append "boot=live components debug timezone=Europe/Rome ip=frommedia consoleblank=0 console=ttyS0 printk.devkmsg=on"
@@ -26,8 +26,8 @@ qemu-system-x86_64 \
     -cdrom "$ISO" \
     -serial stdio \
     -boot d \
-    -kernel live/vmlinuz \
-    -initrd live/initrd.img \
-    -append "boot=live components debug timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0 console=ttyS0 printk.devkmsg=on" \
+    -kernel live/vmlinuz* \
+    -initrd live/initrd.img* \
+    -append "boot=live components timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0 console=ttyS0 printk.devkmsg=on" \
     -hda live_test.qcow2
 
