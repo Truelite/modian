@@ -1,7 +1,6 @@
 #!/bin/sh
   
-# Run an iso inside qemu, changing its boot options to print on serial so that
-# qemu can redirect it to the console, for ease of debugging.
+# Run an iso inside qemu
 
 # stop on error
 set -e
