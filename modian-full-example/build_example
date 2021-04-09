@@ -43,6 +43,7 @@ $MODIAN_LWR \
     --boot-timeout=1 \
     --cache-dir=cache/ \
     --customize-squashfs="customize/squashfs.sh" \
+    --customize-iso="customize/iso.sh" \
     --squashfs-comp="lzo" \
     --work-dir="build" \
     --no-installer  |& tee -a $FILELOG

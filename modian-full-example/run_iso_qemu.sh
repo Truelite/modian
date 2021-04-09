@@ -15,7 +15,7 @@ if [ ! -e live_test.qcow2 ] ; then
 fi
 
 if [ -x /usr/bin/bsdtar ]; then
-    bsdtar xf "$ISO" live/vmlinuz* live/initrd.img*
+    bsdtar xf "$ISO" live/vmlinuz live/initrd.img
 else
     echo "bsdtar is not available; under debian it is in the package libarchive-tools"
 fi
@@ -25,9 +25,9 @@ fi
 qemu-system-x86_64 \
     -m 1G \
     -hdc "$ISO" \
-    -serial stdio \
     -hda live_test.qcow2 \
-    -kernel live/vmlinuz* \
-    -initrd live/initrd.img* \
+    -serial stdio \
+    -kernel live/vmlinuz \
+    -initrd live/initrd.img \
     -append "boot=live components timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0 console=ttyS0 printk.devkmsg=on" \
     -boot d
