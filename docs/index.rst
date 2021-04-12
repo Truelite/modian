@@ -10,6 +10,7 @@ Welcome to Modian's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   system_description
    modian-full-example/index
    modian-live-wrapper/index
    modian-install/index

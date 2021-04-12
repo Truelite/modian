@@ -11,3 +11,4 @@ COMPLETELY DESTROYS all contents of BOTH hard drives in the machine.
    :maxdepth: 2
    :caption: Contents:
 
+   configuration
