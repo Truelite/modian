@@ -12,3 +12,4 @@ COMPLETELY DESTROYS all contents of BOTH hard drives in the machine.
    :caption: Contents:
 
    configuration
+   workings
