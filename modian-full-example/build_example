@@ -38,7 +38,7 @@ $MODIAN_LWR \
     --description="${MLW_DESCRIPTION}" \
     --playbook="ansible/chroot.yaml" \
     --ansible-extra-vars="${MLW_EXTRA_VARS}" \
-    --bootappend="consoleblank=0" \
+    --bootappend="boot=live components timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0" \
     --networkd \
     --boot-timeout=1 \
     --cache-dir=cache/ \
