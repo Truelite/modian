@@ -16,7 +16,7 @@ Depends: ${misc:Depends},
          efibootmgr,
          dosfstools, kbd,
          kpartx, parted, gdisk, lvm2, python3-parted,
-	 bsdtar, beep, python3,
+	 libarchive-tools, beep, python3,
 Description: Modian installation procedures
  This package contains:
  .
