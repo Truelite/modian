@@ -1,8 +1,10 @@
 ---
 - hosts: all
   roles:
+    # our custom role, defined here
     - example
-    - ../modian-live-wrapper/roles/live
+    # live role from the common modian-live-wrapper roles
+    - live
   tasks:
     - name: Placeholder task outside a role
       debug:

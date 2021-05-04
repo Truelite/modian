@@ -59,6 +59,12 @@ class Chroot(Component):
                 print("[defaults]", file=fd)
                 print("nocows = 1", file=fd)
                 print("inventory = {}".format(os.path.abspath(ansible_inventory)), file=fd)
+                print("roles_path = roles:{}/roles".format(
+                    os.path.abspath(os.path.join(
+                        os.path.dirname(__file__),
+                        "../",
+                    ))
+                ), file=fd)
 
             args = [
                 self.ansible_playbook,

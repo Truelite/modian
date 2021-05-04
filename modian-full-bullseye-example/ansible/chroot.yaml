@@ -1,8 +1,10 @@
 ---
 - hosts: all
   roles:
-    - full_example
-    - ../modian-live-wrapper/roles/live
+    # our custom role, defined here
+    - full-example
+    # live role from the common modian-live-wrapper roles
+    - live
   tasks:
     - name: set the modian release name
       lineinfile:
