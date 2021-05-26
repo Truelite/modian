@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -ue
+
+cd /live/image/$(get-modian-distribution)
+rm -rf persistence
+gunzip -k persistence.gz
+reboot

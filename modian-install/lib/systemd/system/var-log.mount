@@ -1,0 +1,12 @@
+[Unit]
+Description=Log directory
+ConditionKernelCommandLine=!systemd.unit=modian-install.target
+
+[Mount]
+What=/dev/disk/by-label/##log##
+Where=/var/log
+Type=ext4
+TimeoutSec=10
+
+[Install]
+WantedBy=local-fs.target

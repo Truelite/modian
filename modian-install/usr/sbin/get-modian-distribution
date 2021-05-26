@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -ue
+
+for option in $(cat /proc/cmdline); do
+    if echo $option | grep live-media-path &>/dev/null; then
+        echo $option | sed -e 's/.*=\(.*\)$/\1/';
+    fi;
+done
