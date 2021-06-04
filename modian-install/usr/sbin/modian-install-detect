@@ -318,6 +318,7 @@ class System:
             actions.append("setup_disk_root")
             actions.append("setup_disk_images")
         else:
+            # Check whether the main partitions exist
             missing = []
             if LABEL_ROOT not in self.partitions:
                 missing.append(LABEL_ROOT)
@@ -344,6 +345,8 @@ class System:
                 # first install of the root disk
                 actions.append("setup_disk_root")
 
+            # Check whether the images partition exist, on a different
+            # disk
             if LABEL_IMAGES in self.partitions:
                 log.info("all partitions found images disk")
             elif self.disk_img:
