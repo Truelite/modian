@@ -3,6 +3,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Files: *
 Copyright: (C) 2015 Iain R. Learmonth <irl@debian.org>
  2018-2020 Enrico Zini
+ 2020-2021 Truelite SRL
 License: BSD-2-clause
 
 License: BSD-2-clause
