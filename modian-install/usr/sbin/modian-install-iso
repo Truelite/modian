@@ -55,7 +55,7 @@ class Installer:
         )
         self.scriptVersion = "1.0"
         self.persistSize = PERSIST_SIZE
-        self.numOfIso = 3
+        self.num_of_iso = args.num_of_iso
 
     def get_GiB_diskSize(self, diskName):
         output = subprocess.check_output(["getDiskSizeGiB", str(diskName)])
@@ -71,11 +71,11 @@ class Installer:
         size = self.get_GiB_diskSize(rootDiskPath)
         log.info("Disco root: %s Size %s GiB", rootDiskPath, size)
         if int(size) > self.get_Gib_partionTableForIsoLive():
-            self.numOfIso = 3
+            self.num_of_iso = 3
             self.persistSize = PERSIST_SIZE_BIG
             log.info(
                 "Large partition detect, use extended parameter. NumOfIso: %s Persistent Size: %s",
-                self.numOfIso,
+                self.num_of_iso,
                 self.persistSize,
             )
 
@@ -298,7 +298,7 @@ menuentry "Version {ver}" {{
         os.utime(self.inst_dir, times=(cur_time, cur_time))
 
         # echo "[6] Remove older live"
-        for ver in versions[:-3]:
+        for ver in versions[:-self.num_of_iso]:
             log.info("Removing old version %s", ver)
             shutil.rmtree(os.path.join(self.dest, "live-" + ver))
 
@@ -348,6 +348,13 @@ def main():
         metavar="file.iso",
         action="store",
         help="ISO image to install",
+    )
+    parser.add_argument(
+        "--max-installed-versions",
+        metavar="num_of_iso",
+        action="store",
+        default=3,
+        help="number of persistence images to keep",
     )
 
     args = parser.parse_args()
