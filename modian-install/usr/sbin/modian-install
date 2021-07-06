@@ -17,6 +17,7 @@
 # PERSISTENZA
 # PERSIST_SIZE      Size of persistence data file (default: 2GiB)
 # PERSIST_FILE      Name of persistence data file
+# MAX_INSTALLED_VERSIONS  Max number of installed version to keep.
 
 if [ "$TEST_FIRST_INSTALL" = 1 ]
 then
@@ -28,6 +29,8 @@ else
     DATADIR=/usr/share/modian-install
     ETCDIR=/etc/modian
 fi
+
+MAX_INSTALLED_VERSIONS=${MAX_INSTALLED_VERSIONS:-3}
 
 . $DATADIR/common.sh
 
