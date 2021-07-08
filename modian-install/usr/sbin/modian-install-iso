@@ -31,6 +31,25 @@ PERSIST_SIZE_BIG = "3000MiB"
 # Nome del file di persistenza
 PERSIST_FILE = "persistence"
 
+# --- Grub configuration components -------------------------
+GRUB_CONFIG = """
+insmod font
+if loadfont /boot/grub/unicode.pf2
+then
+    insmod gfxterm
+    set gfxmode=auto
+    set gfxpayload=keep
+    terminal_output gfxterm
+fi
+set timeout=1
+set default="Version {ver}"
+"""
+GRUB_ENTRY = """
+menuentry "Version {ver}" {{
+  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 --
+  initrd /live-{ver}/initrd.img
+}}"""
+
 
 @contextlib.contextmanager
 def cd(path):
@@ -187,34 +206,12 @@ class Installer:
                 print("insmod efi_uga", file=fd)
             else:
                 print("insmod vbe", file=fd)
-            print(
-                """
-insmod font
-if loadfont /boot/grub/unicode.pf2
-then
-    insmod gfxterm
-    set gfxmode=auto
-    set gfxpayload=keep
-    terminal_output gfxterm
-fi
-set timeout=1
-set default="Version {ver}"
-""".format(
-                    ver=self.modian_release_name
-                ),
-                file=fd,
-            )
+            print(GRUB_CONFIG.format(ver=self.modian_release_name), file=fd)
 
             versions = self.list_installed()
             for ver in versions[::-1]:
                 print(
-                    """
-menuentry "Version {ver}" {{
-  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 --
-  initrd /live-{ver}/initrd.img
-}}""".format(
-                        ver=ver, hostname=socket.gethostname()
-                    ),
+                    GRUB_ENTRY.format(ver=ver, hostname=socket.gethostname()),
                     file=fd,
                 )
 
