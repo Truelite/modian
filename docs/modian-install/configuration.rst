@@ -20,3 +20,5 @@ file, notable ones include:
 ``VERBOSE``
    set to ``yes`` to enable verbose output;
 
+``MAX_INSTALLED_VERSIONS``
+   the number of version that are kept when updating modian. Default is 3.
