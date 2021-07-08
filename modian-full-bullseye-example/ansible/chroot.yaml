@@ -2,7 +2,7 @@
 - hosts: all
   roles:
     # our custom role, defined here
-    - full-example
+    - full_example
     # live role from the common modian-live-wrapper roles
     - live
   tasks:
@@ -21,6 +21,3 @@
         path: /etc/modian/config.sh
         line: 'MAX_INSTALLED_VERSIONS=4'
         regexp: 'MAX_INSTALLED_VERSIONS="'
-    - name: Placeholder task outside a role
-      debug:
-        msg: "Add your tasks here instead of this placeholder"
