@@ -56,6 +56,11 @@ class Repo:
             help='target distribution (default: buster)',
         )
         a_parser.add_argument(
+            '--force', '-f',
+            action="store_true",
+            help='delete existing package before installing',
+        )
+        a_parser.add_argument(
             'deb',
             nargs='+',
             help='.deb package(s) to add',
@@ -106,7 +111,18 @@ class Repo:
         deb_files = []
         for fname in args.deb:
             deb_files.append(os.path.abspath(fname))
+        pkg_names = [os.path.basename(n).split("_")[0] for n in deb_files]
         os.chdir(args.directory)
+        if args.force:
+            subprocess.run(
+                [
+                    'reprepro',
+                    '-b', '.',
+                    'remove',
+                    args.distro,
+                    *pkg_names,
+                ]
+            )
         subprocess.run(
             [
                 'reprepro',
