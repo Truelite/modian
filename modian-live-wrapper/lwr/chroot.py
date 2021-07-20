@@ -59,7 +59,8 @@ class Chroot(Component):
                 print("[defaults]", file=fd)
                 print("nocows = 1", file=fd)
                 print("inventory = {}".format(os.path.abspath(ansible_inventory)), file=fd)
-                print("roles_path = roles:{}/roles".format(
+                print("roles_path = roles:{}:{}/roles".format(
+                    "/usr/share/modian-live-wrapper/roles",
                     os.path.abspath(os.path.join(
                         os.path.dirname(__file__),
                         "../",
