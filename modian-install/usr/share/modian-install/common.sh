@@ -98,6 +98,10 @@ format()
     local label="$1"
     local DEVICE="$2"
     progress "$DEVICE: setting up $label partition"
+    # If the partition is mounted we try to umount it; if it fails because the
+    # partition wasn't mounted it's ok, for any other error mkfs will refuse to
+    # work anyway.
+    umount $DEVICE || true
     mkfs.ext4 -q -F -L $label $DEVICE
     tune2fs -c 0 -i 1m $DEVICE
 }
