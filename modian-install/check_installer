@@ -1,0 +1,4 @@
+#!/bin/sh
+
+flake8 usr/lib/python3/dist-packages/modian_install/
+flake8 usr/sbin/modian_setup.py

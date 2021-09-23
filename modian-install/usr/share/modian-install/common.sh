@@ -8,6 +8,15 @@ else
     IS_UEFI=false
 fi
 
+# look for a custom installation script, or fall back to the default one
+if [ -x /etc/modian/install.py ]
+then
+    INST_SCRIPT=/etc/modian/install.py
+elif [ -x /etc/modian/install ]
+    INST_SCRIPT=/etc/modian/install
+else
+    INST_SCRIPT=/usr/sbin/modian_setup.py
+
 # Terminal control codes to change text color
 COLOR_BLACK=$'\033[0;30m'
 COLOR_WHITE=$'\033[1;37m'
@@ -268,6 +277,10 @@ setup_disk_images()
 
 do_first_install()
 {
+    # run python installer script first
+    $INST_SCRIPT
+
+    # and then do the preexisting script, to do anything that had been missed.
     progress "Disk and partition detection"
     TMPFILE=$(mktemp)
     if [ $IS_UEFI = true ]

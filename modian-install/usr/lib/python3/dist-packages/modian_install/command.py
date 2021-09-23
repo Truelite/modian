@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-from . import hardware
+from . import hardware, actions
 
 
 class InstallCommand:
@@ -22,7 +22,6 @@ class InstallCommand:
         parser.add_argument(
             "-v", "--verbose", action="store_true", help="verbose output"
         )
-        parser.add_argument("--uefi", action="store_true", help="UEFI system")
 
         return parser
 
@@ -39,7 +38,7 @@ class InstallCommand:
             format="%(asctime)s %(levelname)s %(message)s",
         )
 
-    def setup(self):
+    def setup(self, actions_class=None):
         """
         Common command setup tasks including parsing arguments.
 
@@ -49,11 +48,15 @@ class InstallCommand:
         This isn't done in the __init__() because this way it's easier
         to customize the class parameters.
         """
+
         self.parser = self.get_parser()
         self.args = self.parser.parse_args()
         self.setup_logging()
 
         self.hardware = hardware.Hardware(uefi=self.args.uefi)
+        if not actions_class:
+            actions_class = actions.Actions
+        self.actions = actions_class(hardware=self.hardware)
 
-        def main(self):
-            raise NotImplementedError()
+    def main(self):
+        raise NotImplementedError()
