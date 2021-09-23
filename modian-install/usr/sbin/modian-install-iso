@@ -13,6 +13,7 @@ import sys
 import importlib
 from collections import defaultdict
 
+import modian_install
 
 def load_script(name):
     from importlib.machinery import SourceFileLoader
@@ -82,7 +83,7 @@ class Installer:
         return size
 
     def max_num_of_iso_storage(self):
-        hardware = detect.Hardware()
+        hardware = modian_install.hardware.Hardware()
         labels = dict(hardware.list_partition_labels())
         rootDiskBasePath = "/dev/"
         rootDiskPath = rootDiskBasePath + labels.get(detect.LABEL_ROOT)
