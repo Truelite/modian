@@ -23,3 +23,4 @@ class Actions:
 
     def __init__(self, hardware):
         self.hardware = hardware
+        self.queue = []

@@ -13,9 +13,11 @@ if [ -x /etc/modian/install.py ]
 then
     INST_SCRIPT=/etc/modian/install.py
 elif [ -x /etc/modian/install ]
+then
     INST_SCRIPT=/etc/modian/install
 else
     INST_SCRIPT=/usr/sbin/modian_setup.py
+fi
 
 # Terminal control codes to change text color
 COLOR_BLACK=$'\033[0;30m'

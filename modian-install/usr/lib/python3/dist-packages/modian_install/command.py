@@ -38,7 +38,7 @@ class InstallCommand:
             format="%(asctime)s %(levelname)s %(message)s",
         )
 
-    def setup(self, actions_class=None):
+    def setup(self, actions_class=None, system_class=None):
         """
         Common command setup tasks including parsing arguments.
 
@@ -53,10 +53,15 @@ class InstallCommand:
         self.args = self.parser.parse_args()
         self.setup_logging()
 
-        self.hardware = hardware.Hardware(uefi=self.args.uefi)
-        if not actions_class:
+        self.hardware = hardware.Hardware()
+
+        if actions_class is None:
             actions_class = actions.Actions
         self.actions = actions_class(hardware=self.hardware)
+
+        if system_class is None:
+            system_class = hardware.System
+        self.system = system_class(hardware=self.hardware)
 
     def main(self):
         raise NotImplementedError()
