@@ -100,6 +100,35 @@ class System(modian_install.hardware.System):
             self.partitions.get(self.LABELS["esp"], None)
         )
 
+    def compute_firstinstall_actions(self):
+        actions = [
+            "clean_lvm_groups",
+            "setup_disk_root",
+            "setup_disk_images",
+        ]
+        return actions
+
+    def check_additional_root_disk_partitions(self):
+        missing = []
+        if self.LABELS["data"] not in self.partitions:
+            missing.append(self.LABELS["data"])
+        return missing
+
+    def compute_additional_root_disk_partition_actions(self):
+        return ["format_part_data"]
+
+    def compute_additional_disks_actions(self):
+        # Check whether the images partition exist, on a different disk
+        actions = []
+        if self.LABELS["images"] in self.partitions:
+            log.info("all partitions found images disk")
+        elif self.disk_img:
+            log.info(
+                "partition %s not found in images disk",
+                self.LABELS["images"]
+            )
+            actions.append("setup_disk_images")
+        return actions
 
 
 def main():

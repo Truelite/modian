@@ -160,9 +160,8 @@ class System:
         "esp": "##ESP##",
     }
 
-    def __init__(self, hardware, actions):
+    def __init__(self, hardware):
         self.hardware = hardware
-        self.actions = actions
         self.blockdevs = {x.name: x for x in Blockdev.list(hardware)}
         self.labels = dict(self.hardware.list_partition_labels())
         self.disk_inst = None
@@ -320,6 +319,23 @@ class System:
 
         self.log_found_devices()
 
+    def compute_firstinstall_actions(self):
+        actions = [
+            "clean_lvm_groups",
+            "setup_disk_root",
+            "setup_disk_images",
+        ]
+        return actions
+
+    def check_additional_root_disk_partitions(self):
+        return []
+
+    def compute_additional_root_disk_partition_actions(self):
+        return []
+
+    def compute_additional_disks_actions(self):
+        return []
+
     def compute_actions(self):
         actions = []
 
@@ -332,9 +348,7 @@ class System:
                 "running a firstinstall key: "
                 + "force complete reinstall of the machine"
             )
-            self.actions.queue.append("clean_lvm_groups")
-            self.actions.queue.append("setup_disk_root")
-            self.actions.queue.append("setup_disk_images")
+            actions.extend(self.firstinstall_actions())
         else:
             # Check whether the mandatory partitions exist
             missing = []
@@ -345,9 +359,9 @@ class System:
             if self.hardware.uefi and self.LABELS["esp"] not in self.partitions:
                 missing.append(self.LABELS["esp"])
 
-            missing.extend(self.check_additional_partitions())
+            missing.extend(self.check_additional_root_disk_partitions())
 
-            self.actions.queue.append("clean_lvm_groups")
+            actions.append("clean_lvm_groups")
             if not missing:
                 log.info("all partitions found in root disk")
                 # formatting / installing root and log
@@ -356,6 +370,9 @@ class System:
                 actions.append("format_part_log")
                 if self.hardware.uefi:
                     actions.append("format_part_esp")
+                    actions.extend(
+                        self.compute_additional_root_disk_partition_actions()
+                    )
             else:
                 log.info(
                     "partition(s) %s not found in root disk", " ".join(missing)
@@ -363,14 +380,7 @@ class System:
                 # first install of the root disk
                 actions.append("setup_disk_root")
 
-            # Check whether the images partition exist, on a different
-            # disk
-            if LABEL_IMAGES in self.partitions:
-                log.info("all partitions found images disk")
-            elif self.disk_img:
-                log.info("partition %s not found in images disk", LABEL_IMAGES)
-                #  first install of the images disk
-                actions.append("setup_disk_images")
+            actions.extend(self.compute_additional_disks_actions())
 
         log.info("computed actions: %s", " ".join(actions))
 
