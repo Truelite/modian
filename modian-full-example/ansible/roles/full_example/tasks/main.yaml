@@ -7,3 +7,8 @@
   apt:
     name: modian-install
     state: present
+- name: Install the custom installation script
+  copy:
+    src: install.py
+    dest: /etc/modian/install.py
+    mode: 0755

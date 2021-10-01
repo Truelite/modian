@@ -279,18 +279,17 @@ setup_disk_images()
 
 do_first_install()
 {
-    # run python installer script first
-    $INST_SCRIPT
-
-    # and then do the preexisting script, to do anything that had been missed.
-    progress "Disk and partition detection"
+    # set an empty default for DISK_IMG (it will be removed later, when all
+    # disk manipulation is moved to the python script.
+    DISK_IMG=""
+    # run python installer script, but save its output as we used to do with
+    # modian-install-detect
+    progress "Disk and partition detection using $INST_SCRIPT"
     TMPFILE=$(mktemp)
-    if [ $IS_UEFI = true ]
-    then
-	modian-install-detect --uefi --debug > $TMPFILE
-    else
-	modian-install-detect --debug > $TMPFILE
-    fi
+    $INST_SCRIPT --debug > $TMPFILE
+
+    # and then use its output to run the rest of the system installation in the
+    # old way
     cat $TMPFILE >> $RUN_INFO_FILE
     source $TMPFILE
     rm $TMPFILE
