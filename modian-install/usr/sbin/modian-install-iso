@@ -15,14 +15,6 @@ from collections import defaultdict
 
 import modian_install
 
-def load_script(name):
-    from importlib.machinery import SourceFileLoader
-
-    return SourceFileLoader("detect", name).load_module()
-
-
-detect = load_script("/usr/sbin/modian-install-detect")
-
 log = logging.getLogger(__name__)
 
 # ---Persistenza---------------------------------------------
@@ -86,7 +78,9 @@ class Installer:
         hardware = modian_install.hardware.Hardware()
         labels = dict(hardware.list_partition_labels())
         rootDiskBasePath = "/dev/"
-        rootDiskPath = rootDiskBasePath + labels.get(detect.LABEL_ROOT)
+        rootDiskPath = rootDiskBasePath + labels.get(
+            modian_install.hardware.System.LABELS["root"]
+        )
         log.info("Disco root: %s", rootDiskPath)
         size = self.get_GiB_diskSize(rootDiskPath)
         log.info("Disco root: %s Size %s GiB", rootDiskPath, size)
