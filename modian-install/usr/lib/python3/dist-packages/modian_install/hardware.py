@@ -103,6 +103,16 @@ class Hardware:
             if line.startswith("Disk {}".format(disk)):
                 return int(line.split()[2].split(".")[0])
 
+    def get_disk_model(self, disk):
+        """
+        return the model of the disk
+
+        """
+        model_fname = os.path.join("/sys/block", disk, "device/model")
+        with open(model_fname) as fp:
+            model = fp.read()
+        return model.strip()
+
 
 class Blockdev:
     """
@@ -356,7 +366,8 @@ class System:
                 missing.append(self.LABELS["root"])
             if self.LABELS["log"] not in self.partitions:
                 missing.append(self.LABELS["log"])
-            if self.hardware.uefi and self.LABELS["esp"] not in self.partitions:
+            if self.hardware.uefi \
+                    and self.LABELS["esp"] not in self.partitions:
                 missing.append(self.LABELS["esp"])
 
             missing.extend(self.check_additional_root_disk_partitions())

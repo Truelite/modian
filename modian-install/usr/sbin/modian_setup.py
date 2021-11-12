@@ -13,9 +13,10 @@ class Command(modian_install.command.InstallCommand):
     def main(self):
         self.setup()
 
-        hardware = modian_install.hardware.Hardware()
-        system = modian_install.hardware.System(hardware)
-        system.detect()
+        self.hardware = modian_install.hardware.Hardware()
+        self.system = modian_install.hardware.System(self.hardware)
+        self.system.detect()
+        self.print_detection_report()
 
 
 if __name__ == "__main__":

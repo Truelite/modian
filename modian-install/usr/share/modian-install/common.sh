@@ -293,14 +293,9 @@ do_first_install()
     cat $TMPFILE >> $RUN_INFO_FILE
     source $TMPFILE
     rm $TMPFILE
-    verbose "Detected system disk: $DISK_ROOT ($(cat /sys/block/$DISK_ROOT/device/model))"
     if [ -n "${DISK_IMG}" ]; then
         verbose "Detected data disk: $DISK_IMG ($(cat /sys/block/$DISK_IMG/device/model))"
     fi
-    verbose "Detected uSB disk: $DISK_INST ($(cat /sys/block/$DISK_INST/device/model))"
-    verbose "Detected root partition: ${PART_ROOT:-none}"
-    verbose "Detected log partition: ${PART_LOG:-none}"
-    verbose "Detected data partition: ${PART_DATA:-none}"
     verbose "Detected images partition: ${PART_IMAGES:-none}"
     verbose "Detected first install actions: $ACTIONS"
 
