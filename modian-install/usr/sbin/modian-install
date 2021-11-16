@@ -19,7 +19,7 @@
 # PERSIST_FILE      Name of persistence data file
 # MAX_INSTALLED_VERSIONS  Max number of installed version to keep.
 
-set -ue
+set -e
 
 if [ "$TEST_FIRST_INSTALL" = 1 ]
 then
