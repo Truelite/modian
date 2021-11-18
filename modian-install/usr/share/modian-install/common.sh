@@ -265,6 +265,10 @@ setup_disk_images()
 {
     local DISKNAME DEVICE
     DISKNAME="$DISK_IMG"
+    if [ -z "$DISK_IMG" ]
+    then
+        return
+    fi
     DEVICE="/dev/${DISK_IMG}"
 
     progress "$DEVICE: partitioning images disk"
@@ -322,12 +326,20 @@ do_first_install()
     progress "Disabling swap"
     swapoff -a
 
-    # Umount all partitions from the target drive
-    for dev in $(grep ^$DISK_INST /proc/mounts | sed -re 's/[[:space:]].+//')
+    # Umount all partitions from the target drives
+    for dev in $(grep ^/dev/$DISK_ROOT /proc/mounts | sed -re 's/[[:space:]].+//')
     do
-	progress "Umounting $dev"
-	umount $dev
+        progress "Umounting $dev (on the root disk)"
+        umount $dev
     done
+    if [ -n "$DISK_IMG" ]
+    then
+        for dev in $(grep ^/dev/$DISK_IMG /proc/mounts | sed -re 's/[[:space:]].+//')
+        do
+            progress "Umounting $dev (on the img disk)"
+            umount $dev
+        done
+    fi
     echo ""
 
     progress "performing partitioning and file system creation"
@@ -456,7 +468,7 @@ do_feedback() {
         source $RUN_INFO_FILE
 
         # Beepy feedback
-        if [ $RESULT = 0 ]
+        if [ x"$RESULT" = x"0" ]
         then
             do_feedback_ok
         else
