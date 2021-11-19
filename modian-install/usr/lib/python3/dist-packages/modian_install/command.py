@@ -91,6 +91,26 @@ class InstallCommand:
             self.system.partitions.get(self.system.LABELS["log"], "none"),
         ))
 
+    def backup_partitions(self):
+        """
+        Override this to perform a backup of some data before installing.
+        """
+
+    def restore_partitions(self):
+        """
+        Override this to restore the backup performed earlier.
+        """
+
+    def prepare_installation(self):
+        # TODO: migrate to here the miscellaneous steps in
+        # do_first_install up to running the actions
+        pass
+
+    def run_actions(self, actions):
+        # TODO: as a first step, write a script that loads common.sh and
+        # runs all actions and run it with subprocess
+        pass
+
     def main(self):
         self.setup()
 
@@ -98,3 +118,8 @@ class InstallCommand:
         self.system = self.SYSTEM_CLASS(self.hardware)
         self.system.detect()
         self.log_detection_report()
+        self.actions = self.system.compute_actions()
+        self.backup_partions()
+        self.prepare_installation()
+        self.run_actions(self.actions)
+        self.restore_partitions()

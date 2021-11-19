@@ -110,7 +110,7 @@ class Command(modian_install.command.InstallCommand):
             print_env("PART_DATA", self.system.partitions[self.system.LABELS["data"]].dev)
         if self.system.LABELS["esp"] in self.system.partitions:
             print_env("PART_ESP", self.system.partitions[self.system.LABELS["esp"]].dev)
-        print("ACTIONS={}".format(shlex.quote(" ".join(self.system.compute_actions()))))
+        print("ACTIONS={}".format(shlex.quote(" ".join(self.actions))))
 
 
 
