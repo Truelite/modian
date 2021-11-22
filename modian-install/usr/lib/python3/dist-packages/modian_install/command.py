@@ -104,7 +104,17 @@ class InstallCommand:
     def prepare_installation(self):
         # TODO: migrate to here the miscellaneous steps in
         # do_first_install up to running the actions
-        pass
+
+        # tune2fs wants /etc/mtaFirst install a in order to run:
+        # creating it if it is missing
+        self.hardware.create_mtab()
+
+        # In case booting detected a swap partition and enabled it,
+        # disable all swap now so hard disks are not used anymore
+        self.hardware.disable_swap()
+
+        # Umount all partitions from the target drives
+        self.system.umount_partitions_target_drives()
 
     def run_actions(self, actions):
         # TODO: as a first step, write a script that loads common.sh and
@@ -118,8 +128,8 @@ class InstallCommand:
         self.system = self.SYSTEM_CLASS(self.hardware)
         self.system.detect()
         self.log_detection_report()
-        self.actions = self.system.compute_actions()
-        self.backup_partions()
+        self.action_list = self.system.compute_actions()
+        self.backup_partitions()
         self.prepare_installation()
-        self.run_actions(self.actions)
+        self.run_actions(self.action_list)
         self.restore_partitions()

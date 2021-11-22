@@ -297,10 +297,6 @@ do_first_install()
     cat $TMPFILE >> $RUN_INFO_FILE
     source $TMPFILE
     rm $TMPFILE
-    if [ -n "${DISK_IMG}" ]; then
-        verbose "Detected data disk: $DISK_IMG ($(cat /sys/block/$DISK_IMG/device/model))"
-    fi
-    verbose "Detected images partition: ${PART_IMAGES:-none}"
     verbose "Detected first install actions: $ACTIONS"
 
     progress "Data partition detection"
@@ -318,20 +314,7 @@ do_first_install()
         fi
     done
 
-    # tune2fs wants /etc/mtaFirst install a in order to run: creating it if it is missing
-    progress "Creating mtab"
-    test -e /etc/mtab || ln -s /proc/mounts /etc/mtab
-
-    # In case booting detected a swap partition and enabled it, disable all swap now so hard disks are not used anymore
-    progress "Disabling swap"
-    swapoff -a
-
     # Umount all partitions from the target drives
-    for dev in $(grep ^/dev/$DISK_ROOT /proc/mounts | sed -re 's/[[:space:]].+//')
-    do
-        progress "Umounting $dev (on the root disk)"
-        umount $dev
-    done
     if [ -n "$DISK_IMG" ]
     then
         for dev in $(grep ^/dev/$DISK_IMG /proc/mounts | sed -re 's/[[:space:]].+//')

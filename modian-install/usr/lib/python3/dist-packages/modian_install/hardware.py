@@ -113,6 +113,25 @@ class Hardware:
             model = fp.read()
         return model.strip()
 
+    def create_mtab(self):
+        """
+        Create an mtab if it doesn't exist.
+        """
+        log.info("Creating mtab")
+        if not os.path.exists('/etc/mtab'):
+            os.symlink('/proc/mounts', '/etc/mtab')
+
+    def disable_swap(self):
+        """
+        Disable any swap partition.
+        """
+        log.info("Disabling swap")
+        subprocess.run(["swapoff", "-a"])
+
+    def umount_partitions_from_target_drive(self):
+        """
+        """
+
 
 class Blockdev:
     """
@@ -396,3 +415,19 @@ class System:
         log.info("computed actions: %s", " ".join(actions))
 
         return actions
+
+    def umount_partitions_target_drives(self):
+        """
+        Umount all partitions from the target drives.
+
+        Return the list of remaining mounts, for convenience when
+        overriding the method.
+        """
+        with open('/proc/mounts') as fp:
+            mounts = fp.readlines()
+        for line in mounts:
+            if self.disk_root.name in line:
+                subprocess.run(["umount", line.split()[0]])
+                mounts.remove(line)
+
+        return mounts
