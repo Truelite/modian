@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This is a temporary script that runs all actions in $ACTIONS using the code
+# in $DATADIR/common.sh.
+# It is run by the python installer script to run the code that it hasn't been
+# migrated to python yet, until there will be none and it will be deleted.
+
+set -e
+
+. $DATADIR/common.sh
+
+progress "performing partitioning and file system creation"
+for a in $ACTIONS
+do
+    $a
+done

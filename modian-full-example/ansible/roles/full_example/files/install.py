@@ -2,15 +2,13 @@
 
 import logging
 import sys
-import os
-import re
-import shlex
 
 import modian_install
 
 log = logging.getLogger()
 
 VERSION = "1.0"
+
 
 class System(modian_install.hardware.System):
     def __init__(self, hardware):
@@ -94,25 +92,13 @@ class Command(modian_install.command.InstallCommand):
             self.system.partitions.get(self.system.LABELS["data"], "none"),
         ))
 
-    def main(self):
-        super().main()
-
-        def print_env(k, v):
-            print("{}={}".format(k, shlex.quote(v)))
-
-        print_env("DISK_ROOT", self.system.disk_root.name)
-        print_env("DISK_INST", self.system.disk_inst.name)
-        if self.system.LABELS["root"] in self.system.partitions:
-            print_env("PART_ROOT", self.system.partitions[self.system.LABELS["root"]].dev)
-        if self.system.LABELS["log"] in self.system.partitions:
-            print_env("PART_LOG", self.system.partitions[self.system.LABELS["log"]].dev)
+    def add_additional_environment(self):
+        env = {}
         if self.system.LABELS["data"] in self.system.partitions:
-            print_env("PART_DATA", self.system.partitions[self.system.LABELS["data"]].dev)
-        if self.system.LABELS["esp"] in self.system.partitions:
-            print_env("PART_ESP", self.system.partitions[self.system.LABELS["esp"]].dev)
-        print("ACTIONS={}".format(shlex.quote(" ".join(self.action_list))))
-
-
+            env["PART_DATA"] = self.system.partitions[
+                self.system.LABELS["data"]
+            ].dev
+        return env
 
 
 if __name__ == "__main__":

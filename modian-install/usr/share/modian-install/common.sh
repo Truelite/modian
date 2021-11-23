@@ -292,6 +292,10 @@ do_first_install()
     TMPFILE=$(mktemp)
     $INST_SCRIPT --debug > $TMPFILE
 
+    return
+
+    # this is ignored, even if it still has to be migrated
+
     # and then use its output to run the rest of the system installation in the
     # old way
     cat $TMPFILE >> $RUN_INFO_FILE
@@ -324,12 +328,6 @@ do_first_install()
         done
     fi
     echo ""
-
-    progress "performing partitioning and file system creation"
-    for a in $ACTIONS
-    do
-	$a
-    done
 
     progress "Restore data partition"
     if [ -d ${BACKUPDIR}/System ]; then

@@ -2,6 +2,12 @@ import argparse
 import logging
 import sys
 
+# Used for the non-pythonic running of actions: remove these three after
+# it has been completely converted.
+import os
+import shlex
+import subprocess
+
 from . import hardware, actions
 
 
@@ -116,10 +122,31 @@ class InstallCommand:
         # Umount all partitions from the target drives
         self.system.umount_partitions_target_drives()
 
+    def add_additional_environment(self):
+        return {}
+
     def run_actions(self, actions):
         # TODO: as a first step, write a script that loads common.sh and
         # runs all actions and run it with subprocess
-        pass
+        env = os.environ.copy()
+        env["DISK_ROOT"] = self.system.disk_root.name
+        env["DISK_INST"] = self.system.disk_inst.name
+        if self.system.LABELS["root"] in self.system.partitions:
+            env["PART_ROOT"] = self.system.partitions[self.system.LABELS["root"]].dev
+        if self.system.LABELS["log"] in self.system.partitions:
+            env["PART_LOG"] = self.system.partitions[self.system.LABELS["log"]].dev
+        if self.system.LABELS["esp"] in self.system.partitions:
+            env["PART_ESP"] = self.system.partitions[self.system.LABELS["esp"]].dev
+        env["ACTIONS"] = "{}".format(shlex.quote(" ".join(self.action_list)))
+
+        env.update(self.add_additional_environment())
+
+        print("ENV is", env)
+        for k, v in env.items():
+            if type(v) == hardware.Partition:
+                print("Found a partition, {} in {}".format(v, k))
+
+        subprocess.run(['/usr/sbin/modian-run-actions'], env=env)
 
     def main(self):
         self.setup()
