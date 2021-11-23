@@ -8,17 +8,6 @@ else
     IS_UEFI=false
 fi
 
-# look for a custom installation script, or fall back to the default one
-if [ -x /etc/modian/install.py ]
-then
-    INST_SCRIPT=/etc/modian/install.py
-elif [ -x /etc/modian/install ]
-then
-    INST_SCRIPT=/etc/modian/install
-else
-    INST_SCRIPT=/usr/sbin/modian_setup.py
-fi
-
 # Terminal control codes to change text color
 COLOR_BLACK=$'\033[0;30m'
 COLOR_WHITE=$'\033[1;37m'
@@ -283,25 +272,9 @@ setup_disk_images()
 
 do_first_install()
 {
-    # set an empty default for DISK_IMG (it will be removed later, when all
-    # disk manipulation is moved to the python script.
-    DISK_IMG=""
-    # run python installer script, but save its output as we used to do with
-    # modian-install-detect
-    progress "Disk and partition detection using $INST_SCRIPT"
-    TMPFILE=$(mktemp)
-    $INST_SCRIPT --debug > $TMPFILE
-
     return
 
     # this is ignored, even if it still has to be migrated
-
-    # and then use its output to run the rest of the system installation in the
-    # old way
-    cat $TMPFILE >> $RUN_INFO_FILE
-    source $TMPFILE
-    rm $TMPFILE
-    verbose "Detected first install actions: $ACTIONS"
 
     progress "Data partition detection"
     TMPDIR=$(mktemp -d)

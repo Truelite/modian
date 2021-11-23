@@ -32,6 +32,18 @@ else
     ETCDIR=/etc/modian
 fi
 
+# look for a custom installation script, or fall back to the default one
+if [ -x /etc/modian/install.py ]
+then
+    INST_SCRIPT=/etc/modian/install.py
+elif [ -x /etc/modian/install ]
+then
+    INST_SCRIPT=/etc/modian/install
+else
+    INST_SCRIPT=/usr/sbin/modian_setup.py
+fi
+
+
 MAX_INSTALLED_VERSIONS=${MAX_INSTALLED_VERSIONS:-3}
 
 . $DATADIR/common.sh
@@ -44,12 +56,8 @@ first_install_main()
     :> $RUN_INFO_FILE
 
     # If we run first-install, use exec so we do not continue with the rest of live-config
-    # Run in a subshell so we can "set -e" without influencing the whole script
-    (
-        set -ue
-        . $ETCDIR/config.sh
-        do_first_install
-    )
+    # Run the python installation script
+    $INST_SCRIPT --debug
 
     RES=$?
 
