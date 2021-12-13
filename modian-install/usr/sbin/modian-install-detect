@@ -89,7 +89,14 @@ class Hardware:
         import parted
 
         pdev = parted.getDevice("/dev/" + name)
-        pdisk = parted.newDisk(pdev)
+        try:
+            pdisk = parted.newDisk(pdev)
+        except parted.DiskException as e:
+            if "unrecognised disk label" in e.args[0]:
+                return None
+            else:
+                raise
+
         if pdisk.type != "gpt":
             log.error(
                 "device %s has partition table type %s instead of gpt",
