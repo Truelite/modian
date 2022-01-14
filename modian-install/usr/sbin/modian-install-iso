@@ -46,7 +46,7 @@ set default="Version {ver}"
 """
 GRUB_ENTRY = """
 menuentry "Version {ver}" {{
-  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 --
+  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 {boot_append} --
   initrd /live-{ver}/initrd.img
 }}"""
 
@@ -75,6 +75,7 @@ class Installer:
         self.scriptVersion = "1.0"
         self.persistSize = PERSIST_SIZE
         self.num_of_iso = args.max_installed_versions
+        self.boot_append = args.boot_append
 
     def get_GiB_diskSize(self, diskName):
         output = subprocess.check_output(["getDiskSizeGiB", str(diskName)])
@@ -211,7 +212,11 @@ class Installer:
             versions = self.list_installed()
             for ver in versions[::-1]:
                 print(
-                    GRUB_ENTRY.format(ver=ver, hostname=socket.gethostname()),
+                    GRUB_ENTRY.format(
+                        ver=ver,
+                        hostname=socket.gethostname(),
+                        boot_append=self.boot_append,
+                    ),
                     file=fd,
                 )
 
@@ -351,6 +356,13 @@ def main():
         action="store",
         default=3,
         help="number of persistence images to keep",
+    )
+
+    parser.add_argument(
+        "--boot-append",
+        action="store",
+        default="",
+        help="additional parameters for the installed grub",
     )
 
     args = parser.parse_args()

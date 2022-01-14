@@ -118,7 +118,7 @@ format_part_root()
         # Legacy system
         grub-install --no-floppy --root-directory=/mnt /dev/$DISK_ROOT
 	install -m 0644 /usr/share/grub/unicode.pf2 /mnt/boot/grub
-        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS
+        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS --boot-append=$INSTALLED_BOOT_APPEND
         umount /mnt
     fi
 }
@@ -141,7 +141,7 @@ format_part_esp()
         mount /dev/$PART_ESP /boot/efi
         grub-install --no-floppy --efi-directory=/boot/efi --root-directory=/mnt /dev/$DISK_ROOT
         install -m 0644 /usr/share/grub/unicode.pf2 /mnt/boot/grub
-        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS
+        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS --boot-append=$INSTALLED_BOOT_APPEND
         umount /boot/efi
 	umount /mnt
     fi
