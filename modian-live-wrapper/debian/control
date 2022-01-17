@@ -3,7 +3,7 @@ Maintainer: Enrico Zini <enrico@enricozini.org>
 Section: misc
 Priority: optional
 Build-Depends:
-               debhelper-compat (= 13),
+               debhelper-compat (= 12),
                dh-python,
                python3-all,
                python3-apt,
