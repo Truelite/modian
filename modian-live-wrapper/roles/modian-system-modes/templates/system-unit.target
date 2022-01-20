@@ -1,0 +1,7 @@
+[Unit]
+Description={{name}} system mode
+{% if description %}Description={{description}}{% endif %}
+{% if documentation %}Documentation={{documentation}}{% endif %}
+Requires=default.target
+After=default.target
+AllowIsolate=yes

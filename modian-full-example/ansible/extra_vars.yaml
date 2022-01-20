@@ -1,2 +1,8 @@
 # fill this when there will be a public repository with modian packages
-modian_repo: ''
+modian_repo: 'http://localhost:8099'
+modian_system_modes:
+ - name: kiosk
+   description: Locked down kiosk mode
+   documentation: https://docs.example.org/system-modes/kiosk
+ - name: maint
+   description: Maintenance mode

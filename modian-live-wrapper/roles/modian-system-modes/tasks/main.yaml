@@ -1,0 +1,21 @@
+---
+- name: "Create system modian-mode-{{name}}.target" 
+  template:
+      src: system-unit.target
+      dest: "/lib/systemd/system/modian-mode-{{name}}.target"
+  with_items: 
+   - name: creadigit
+     documentation: Creadigit mode
+
+- name: "Create user modian-mode-{{name}}.target" 
+  template:
+      src: user-unit.target
+      dest: "/lib/systemd/user/modian-mode-{{name}}.target"
+  with_items: 
+   - name: creadigit
+     documentation: Creadigit mode
+
+- name: Add Xsession hook
+  template:
+     src: xsession-hook
+     dest: /etc/X11/Xsession.d/99modian-system-modes
