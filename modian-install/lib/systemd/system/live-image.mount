@@ -1,6 +1,7 @@
+[Unit]
 Description=Live image directory
 ConditionPathIsSymbolicLink=!/live/mount
-ConditionKernelCommandLine=!systemd.unit=modian-install.target
+Conflicts=modian-install.target
 
 [Mount]
 What=/dev/disk/by-label/##root##

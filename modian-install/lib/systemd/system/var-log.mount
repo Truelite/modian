@@ -1,6 +1,6 @@
 [Unit]
 Description=Log directory
-ConditionKernelCommandLine=!systemd.unit=modian-install.target
+Conflicts=modian-install.target
 
 [Mount]
 What=/dev/disk/by-label/##log##
