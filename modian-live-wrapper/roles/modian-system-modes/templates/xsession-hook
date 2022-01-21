@@ -2,7 +2,7 @@
 
 SYSTEM_MODE=$(sed -nre 's/.+systemd\.unit=modian-mode-([^ ]+)\.target.*/\1/p' /proc/cmdline)
 
-if [ -n "$SYSTEM_MODE"]
+if [ -n "$SYSTEM_MODE" ]
 then
 	systemctl --user import-environment PATH DBUS_SESSION_BUS_ADDRESS
 	systemctl --no-block --user start "modian-mode-$SYSTEM_MODE.target"
