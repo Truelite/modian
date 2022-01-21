@@ -1,9 +1,5 @@
 ---
-- name: Add the modian repository
-  apt_repository:
-    repo: 'deb {{ modian_repo }} {{ distribution }} main'
-    state: present
-- name: Install modian packages
+- name: Install custom packages
   apt:
-    name: modian-install
+    name: cowsay,fortune
     state: present
