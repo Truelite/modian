@@ -26,8 +26,7 @@ qemu-system-x86_64 \
     -m 1G \
     -hdc "$ISO" \
     -hda live_test.qcow2 \
-    -serial stdio \
     -kernel live/vmlinuz \
     -initrd live/initrd.img \
-    -append "boot=live components timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0 console=ttyS0 printk.devkmsg=on" \
+    -append "boot=live components timezone=Europe/Rome ip=frommedia systemd.unit=modian-install.target consoleblank=0 printk.devkmsg=on" \
     -boot d

@@ -1,0 +1,6 @@
+[Unit]
+Description={% if 'description' in item %}{{item.description}}{% else %}{{item.name}} system mode{% endif %}
+
+{% if 'documentation' in item %}Documentation={{item.documentation}}{% endif %}
+
+BindsTo=graphical-session.target
