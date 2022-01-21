@@ -2,18 +2,30 @@
 - name: "Create system modian-mode-{{name}}.target" 
   template:
       src: system-unit.target
-      dest: "/lib/systemd/system/modian-mode-{{name}}.target"
-  with_items: 
-   - name: creadigit
-     documentation: Creadigit mode
+      dest: "/lib/systemd/system/modian-mode-{{item.name}}.target"
+  loop: "{{modian_system_modes}}"
 
 - name: "Create user modian-mode-{{name}}.target" 
   template:
       src: user-unit.target
-      dest: "/lib/systemd/user/modian-mode-{{name}}.target"
-  with_items: 
-   - name: creadigit
-     documentation: Creadigit mode
+      dest: "/lib/systemd/user/modian-mode-{{item.name}}.target"
+  loop: "{{modian_system_modes}}"
+
+- name: Make sure /etc/X11 exists
+  file:
+      path: /etc/X11
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+- name: Make sure /etc/X11/Xsession.d exists
+  file:
+      path: /etc/X11/Xsession.d
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
 
 - name: Add Xsession hook
   template:

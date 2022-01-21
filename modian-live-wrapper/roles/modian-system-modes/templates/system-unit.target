@@ -1,7 +1,8 @@
 [Unit]
-Description={{name}} system mode
-{% if description %}Description={{description}}{% endif %}
-{% if documentation %}Documentation={{documentation}}{% endif %}
+Description={% if 'description' in item %}{{item.description}}{% else %}{{item.name}} system mode{% endif %}
+
+{% if 'documentation' in item %}Documentation={{item.documentation}}{% endif %}
+
 Requires=default.target
 After=default.target
 AllowIsolate=yes

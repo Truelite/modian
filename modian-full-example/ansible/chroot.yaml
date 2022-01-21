@@ -5,6 +5,7 @@
     - full_example
     # live role from the common modian-live-wrapper roles
     - live
+    - modian-system-modes
   tasks:
     - name: set the modian release name
       lineinfile:
