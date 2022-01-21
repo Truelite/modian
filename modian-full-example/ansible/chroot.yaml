@@ -4,7 +4,6 @@
     # live and modian roles from the common modian-live-wrapper roles
     - live
     - modian
-    - modian-system-modes
     # our custom role, defined here
     - full_example
   tasks:
