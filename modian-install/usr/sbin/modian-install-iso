@@ -43,10 +43,11 @@ then
 fi
 set timeout=1
 set default="Version {ver}"
+set start_unit=default.target
 """
 GRUB_ENTRY = """
 menuentry "Version {ver}" {{
-  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 {boot_append} --
+  linux /live-{ver}/vmlinuz boot=live ip=frommedia hostname={hostname} persistence-path=/live-{ver}/ persistence live-media-path=live-{ver} consoleblank=0 systemd.unit=$start_unit {boot_append} --
   initrd /live-{ver}/initrd.img
 }}"""
 
@@ -207,7 +208,10 @@ class Installer:
                 print("insmod efi_uga", file=fd)
             else:
                 print("insmod vbe", file=fd)
-            print(GRUB_CONFIG.format(ver=self.modian_release_name), file=fd)
+            print(GRUB_CONFIG.format(
+                ver=self.modian_release_name,
+                systemd_target=self.systemd_target,
+            ), file=fd)
 
             versions = self.list_installed()
             for ver in versions[::-1]:
