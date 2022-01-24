@@ -43,7 +43,7 @@ then
 fi
 set timeout=1
 set default="Version {ver}"
-set start_unit=default.target
+set start_unit={systemd_target}
 """
 GRUB_ENTRY = """
 menuentry "Version {ver}" {{
@@ -77,6 +77,7 @@ class Installer:
         self.persistSize = PERSIST_SIZE
         self.num_of_iso = args.max_installed_versions
         self.boot_append = args.boot_append
+        self.systemd_target = args.systemd_target
 
     def get_GiB_diskSize(self, diskName):
         output = subprocess.check_output(["getDiskSizeGiB", str(diskName)])
@@ -220,6 +221,7 @@ class Installer:
                         ver=ver,
                         hostname=socket.gethostname(),
                         boot_append=self.boot_append,
+                        systemd_target=self.systemd_target,
                     ),
                     file=fd,
                 )
@@ -367,6 +369,13 @@ def main():
         action="store",
         default="",
         help="additional parameters for the installed grub",
+    )
+
+    parser.add_argument(
+        "--systemd-target",
+        action="store",
+        default="",
+        help="default target at boot of the installed system",
     )
 
     args = parser.parse_args()
