@@ -1,5 +1,6 @@
-System mode selection for modian
-================================
+**********************************
+ System mode selection for modian
+**********************************
 
 Modian supports configuring systems to behave in different ways depending on
 the ``systemd.unit=`` set in the kernel commandline.
@@ -23,9 +24,8 @@ descriptions::
 Only the ``name`` key is mandatory. The other keys are optional and, if
 present, will be added to the relevant ``.target`` files.
 
-
 Customizing behaviour based on system modes
--------------------------------------------
+===========================================
 
 For each system mode, a target ``modian-mode-$NAME.target`` is created both in
 the system and in the user systemd sessions, so that different behaviour can be
@@ -53,3 +53,5 @@ xeyes.service``, or by manually creating the equivalent symlink.
 
 System services can similarly be ``WantedBy=modian-mode-….target``.
 
+See also :doc:`grub` to set the systemd target that is run at the
+first boot.
