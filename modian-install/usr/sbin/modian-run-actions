@@ -7,6 +7,8 @@
 
 set -e
 
+DATADIR=/usr/share/modian-install
+
 . $DATADIR/common.sh
 
 progress "performing partitioning and file system creation"
