@@ -23,3 +23,5 @@ MODIAN_RELEASE_NAME="<modian_release_name>"
 MODIAN_RELEASE_FULL_NAME='<modian_release_full_name>'
 HOSTNAME=$(hostname)
 DIR_BOOTSCRIPT=/etc/modian/boot.d
+SYSTEMD_TARGET=default.target
+INSTALLED_BOOT_APPEND=""

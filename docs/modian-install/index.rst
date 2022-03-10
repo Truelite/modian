@@ -14,3 +14,5 @@ COMPLETELY DESTROYS all contents of BOTH hard drives in the machine.
    configuration
    workings
    version_management
+   grub
+   system_modes

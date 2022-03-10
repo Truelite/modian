@@ -1,6 +1,9 @@
 ---
 - hosts: all
   roles:
+    # live and modian roles from the common modian-live-wrapper roles
+    - live
+    - modian
     # our custom role, defined here
     - full_example
     # live role from the common modian-live-wrapper roles
