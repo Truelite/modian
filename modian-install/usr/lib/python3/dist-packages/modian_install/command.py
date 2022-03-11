@@ -137,7 +137,7 @@ class InstallCommand:
             env["PART_LOG"] = self.system.partitions[self.system.LABELS["log"]].dev
         if self.system.LABELS["esp"] in self.system.partitions:
             env["PART_ESP"] = self.system.partitions[self.system.LABELS["esp"]].dev
-        env["ACTIONS"] = "{}".format(shlex.quote(" ".join(self.action_list)))
+        env["ACTIONS"] = "{}".format(" ".join(self.action_list))
 
         env.update(self.add_additional_environment())
 
