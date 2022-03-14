@@ -58,6 +58,9 @@ fail()
     exit 1
 }
 
+# Read the config.sh (this should really happen in the python command, however)
+. /etc/modian/config.sh
+
 #return the disk size in GiB
 #Parameter device name (ex: /dev/sda)
 getGiBdisksize()
