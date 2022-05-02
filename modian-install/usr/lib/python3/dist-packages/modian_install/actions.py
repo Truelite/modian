@@ -16,11 +16,28 @@ class ModianError(RuntimeError):
     """
 
 
+class ActionNotImplementedError(NotImplementedError):
+    """
+    Exception raised when an action is still not implemented.
+    """
+
+
 class Actions:
     """
     Steps to manipulate the system during the installation.
     """
 
-    def __init__(self, hardware):
+    def __init__(self, system, hardware):
+        self.system = system
         self.hardware = hardware
         self.queue = []
+
+    def run_action(self, action):
+        try:
+            getattr(self, action)()
+        except AttributeError:
+            raise ActionNotImplementedError()
+
+    def do_nothing(self):
+        print("I am doing nothing!")
+        log.warning("And logging nothing!")

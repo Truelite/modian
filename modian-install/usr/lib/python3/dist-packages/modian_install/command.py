@@ -20,6 +20,7 @@ class InstallCommand:
 
     HARDWARE_CLASS = hardware.Hardware
     SYSTEM_CLASS = hardware.System
+    ACTIONS_CLASS = actions.Actions
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.DESCRIPTION)
@@ -65,15 +66,15 @@ class InstallCommand:
         self.args = self.parser.parse_args()
         self.setup_logging()
 
-        self.hardware = hardware.Hardware()
-
-        if actions_class is None:
-            actions_class = actions.Actions
-        self.actions = actions_class(hardware=self.hardware)
+        self.hardware = self.HARDWARE_CLASS()
 
         if system_class is None:
-            system_class = hardware.System
+            system_class = self.SYSTEM_CLASS
         self.system = system_class(hardware=self.hardware)
+
+        if actions_class is None:
+            actions_class = self.ACTIONS_CLASS
+        self.actions = actions_class(self.system, hardware=self.hardware)
 
     def log_detection_report(self):
         """
@@ -125,7 +126,7 @@ class InstallCommand:
     def add_additional_environment(self):
         return {}
 
-    def run_actions(self, actions):
+    def run_actions(self):
         # TODO: as a first step, write a script that loads common.sh and
         # runs all actions and run it with subprocess
         env = os.environ.copy()
@@ -141,22 +142,24 @@ class InstallCommand:
 
         env.update(self.add_additional_environment())
 
-        print("ENV is", env)
-        for k, v in env.items():
-            if type(v) == hardware.Partition:
-                print("Found a partition, {} in {}".format(v, k))
+        self.action_list.append("do_nothing")
 
-        subprocess.run(['/usr/sbin/modian-run-actions'], env=env)
+        for action in self.action_list:
+            try:
+                self.actions.run_action(action)
+            except actions.ActionNotImplementedError:
+                subprocess.run([
+                    '/usr/sbin/modian-run-action',
+                    action
+                ], env=env)
 
     def main(self):
         self.setup()
 
-        self.hardware = self.HARDWARE_CLASS()
-        self.system = self.SYSTEM_CLASS(self.hardware)
         self.system.detect()
         self.log_detection_report()
         self.action_list = self.system.compute_actions()
         self.backup_partitions()
         self.prepare_installation()
-        self.run_actions(self.action_list)
+        self.run_actions()
         self.restore_partitions()
