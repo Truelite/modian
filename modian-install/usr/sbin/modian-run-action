@@ -11,5 +11,5 @@ DATADIR=/usr/share/modian-install
 
 . $DATADIR/common.sh
 
-progress "Running action $1"
+progress "Running legacy action $1"
 $1

@@ -5,7 +5,6 @@ import sys
 # Used for the non-pythonic running of actions: remove these three after
 # it has been completely converted.
 import os
-import shlex
 import subprocess
 
 from . import hardware, actions
@@ -142,7 +141,7 @@ class InstallCommand:
 
         env.update(self.add_additional_environment())
 
-        self.action_list.append("do_nothing")
+        self.action_list.append("nothing")
 
         for action in self.action_list:
             try:

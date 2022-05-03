@@ -175,26 +175,6 @@ format_part_images()
     format '##images##' /dev/$PART_IMAGES
 }
 
-# Clean lvm groups
-clean_lvm_groups()
-{
-    for lv in $(lvs --noheadings -o lvname)
-    do
-        verbose "removing ${lv} logical volume"
-        lvremove -f ${lv}
-    done
-    for vg in $(vgs --noheadings -o vgname)
-    do
-        verbose "removing ${vg} logical volume"
-        vgremove -f ${vg}
-    done
-    for pv in $(pvs --noheadings -o pvname)
-    do
-        verbose "removing ${pv} phisical volume"
-        pvremove -f ${pv}
-    done
-}
-
 #This function returm the partition name
 #Param 1: diskname
 #Param 2: partition number

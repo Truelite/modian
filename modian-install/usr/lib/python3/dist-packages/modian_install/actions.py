@@ -34,9 +34,36 @@ class Actions:
 
     def run_action(self, action):
         try:
-            getattr(self, action)()
-        except AttributeError:
-            raise ActionNotImplementedError()
+            action_method = getattr(self, "do_" + action)
+        except AttributeError as e:
+            raise ActionNotImplementedError(e)
+        log.info("Running action %s", action)
+        action_method()
+
+    def _stdout_lines_from_command(self, command):
+        res = subprocess.run(command, stdout=subprocess.PIPE)
+        for line in res.stdout.split(b"\n"):
+            # we only provide lines with some content
+            if line:
+                yield line
+
+    def do_clean_lvm_groups(self):
+        log.info("cleaning")
+        for lv in self._stdout_lines_from_command(
+            ["lvs", "--noheadings", "-o", "lvname"]
+        ):
+            log.info("removing %s logical volume", lv)
+            subprocess.run(["lvremove", "-f", lv])
+        for vg in self._stdout_lines_from_command(
+            ["vgs", "--noheadings", "-o", "vgname"]
+        ):
+            log.info("removing %s volume group", vg)
+            subprocess.run(["vgremove", "-f", vg])
+        for pv in self._stdout_lines_from_command(
+            ["pvs", "--noheadings", "-o", "pvname"]
+        ):
+            log.info("removing %s physical volume", pv)
+            subprocess.run(["pvremove", "-f", pv])
 
     def do_nothing(self):
         print("I am doing nothing!")
