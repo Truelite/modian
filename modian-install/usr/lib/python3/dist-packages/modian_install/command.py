@@ -141,8 +141,6 @@ class InstallCommand:
 
         env.update(self.add_additional_environment())
 
-        self.action_list.append("nothing")
-
         for action in self.action_list:
             try:
                 self.actions.run_action(action)

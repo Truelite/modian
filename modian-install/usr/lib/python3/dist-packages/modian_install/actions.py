@@ -48,7 +48,6 @@ class Actions:
                 yield line
 
     def do_clean_lvm_groups(self):
-        log.info("cleaning")
         for lv in self._stdout_lines_from_command(
             ["lvs", "--noheadings", "-o", "lvname"]
         ):
@@ -64,7 +63,3 @@ class Actions:
         ):
             log.info("removing %s physical volume", pv)
             subprocess.run(["pvremove", "-f", pv])
-
-    def do_nothing(self):
-        print("I am doing nothing!")
-        log.warning("And logging nothing!")
