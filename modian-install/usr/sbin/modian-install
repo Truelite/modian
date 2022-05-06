@@ -48,6 +48,10 @@ MAX_INSTALLED_VERSIONS=${MAX_INSTALLED_VERSIONS:-3}
 
 . $DATADIR/common.sh
 
+# we load the configuration from bash now, so that it is available in the env
+# of the python installer later.
+. $ETCDIR/config.sh
+
 first_install_main()
 {
     verbose "First Install"

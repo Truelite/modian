@@ -27,6 +27,20 @@ class Hardware:
         with open(dev, "rt") as fd:
             return fd.read().strip()
 
+    def run_cmd_stop_errors(self, cmd, *args, **kw):
+        """
+        Run a command with subprocess and stop in case of errors
+        """
+        res = subprocess.run(cmd, *args, **kw)
+        if res.returncode != 0:
+            raise ModianError(
+                "Command ``{}`` failed, returncode is {}".format(
+                    " ".join(cmd),
+                    res.returncode
+                )
+            )
+        return res
+
     def read_iso_volume_id(self, pathname):
         with open(pathname, "rb") as fd:
             fd.seek(0x8028)
@@ -138,6 +152,20 @@ class Hardware:
     def umount_partitions_from_target_drive(self):
         """
         """
+
+    def format_device(self, label, device):
+        """
+        Format a device (e.g. /dev/sda1) with a label.
+        """
+        log.info("%s: setting up %s partition", device, label)
+        # If the partition is mounted we try to umount it; if it fails
+        # because the partition wasn't mounted it's ok, for any other
+        # error mkfs will refuse to work anyway.
+        subprocess.run(["umount", device])
+        self.run_cmd_stop_errors([
+            "mkfs.ext4", "-q", "-F", "-L", label, device
+        ])
+        self.run_cmd_stop_errors(["tune2fs", "-c", "0", "-i", "1m", device])
 
 
 class Blockdev:

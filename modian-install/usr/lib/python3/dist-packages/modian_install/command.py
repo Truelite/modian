@@ -65,6 +65,8 @@ class InstallCommand:
         self.args = self.parser.parse_args()
         self.setup_logging()
 
+        self.env_config = self.read_configuration_from_env()
+
         self.hardware = self.HARDWARE_CLASS()
 
         if system_class is None:
@@ -73,7 +75,23 @@ class InstallCommand:
 
         if actions_class is None:
             actions_class = self.ACTIONS_CLASS
-        self.actions = actions_class(self.system, hardware=self.hardware)
+        self.actions = actions_class(
+            system=self.system,
+            hardware=self.hardware,
+            env_config=self.env_config,
+        )
+
+    def read_configuration_from_env(self):
+        env_config = {
+            "modian_release_name": os.getenv("MODIAN_RELEASE_NAME"),
+            "modian_release_full_name": os.getenv("MODIAN_RELEASE_FULL_NAME"),
+            "hostname": os.getenv("HOSTNAME"),
+            "dir_bootscript": os.getenv("DIR_BOOTSCRIPT"),
+            "systemd_target": os.getenv("SYSTEMD_TARGET"),
+            "installed_boot_append": os.getenv("INSTALLED_BOOT_APPEND"),
+            "max_installed_versions": os.getenv("MAX_INSTALLED_VERSIONS"),
+        }
+        return env_config
 
     def log_detection_report(self):
         """
