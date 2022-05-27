@@ -200,9 +200,6 @@ class Actions:
         self.do_format_part_log(
             self.hardware.get_partition_disk_name(disk_root, 2),
         )
-        self.do_format_part_data(
-            self.hardware.get_partition_disk_name(disk_root, 3),
-        )
         if self.hardware.uefi:
             self.do_format_part_esp(
                 self.hardware.get_partition_disk_name(disk_root, 4),

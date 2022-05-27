@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import logging
+import os
 import sys
 
 import modian_install
@@ -64,8 +65,53 @@ class System(modian_install.hardware.System):
         return ["format_part_data"]
 
 
+class Actions(modian_install.actions.Actions):
+    def do_format_part_data(self, part_data=None):
+        part_data = part_data or os.path.join(
+            "/dev",
+            self.system.partitions[self.system.LABELS["data"]].dev,
+        )
+        self.hardware.format_device("##data##", part_data)
+
+        # Create initial directory structure
+        self.hardware.run_cmd_stop_errors(["mount", part_data, "/mnt"])
+        os.makedirs("/mnt/images/inkjet")
+        os.makedirs("/mnt/cfast")
+        self.hardware.run_cmd_stop_errors(["umount", "/mnt"])
+
+    def do_format_part_images(self, part_images=None):
+        part_images = part_images or os.path.join(
+            "/dev",
+            self.system.partitions[self.system.LABELS["images"]].dev,
+        )
+        self.hardware.format_device("##images##", part_images)
+
+    def do_setup_disk_root(self):
+        super().do_setup_disk_root()
+        disk_root = os.path.join(
+            "/dev",
+            self.system.disk_root.name,
+        )
+        self.do_format_part_data(
+            self.hardware.get_partition_disk_name(disk_root, 3),
+        )
+
+    def do_setup_disk_images(self):
+        if not self.system.disk_img:
+            return
+        disk_img = os.path.join(
+            "/dev",
+            self.system.disk_img.name,
+        )
+        log.info("%s: partitioning images disk", disk_img)
+        self.do_format_part_images(
+            self.hardware.get_partition_disk_name(disk_img, 1),
+        )
+
+
 class Command(modian_install.command.InstallCommand):
     SYSTEM_CLASS = System
+    ACTIONS_CLASS = Actions
 
     def log_detection_report(self):
         """
