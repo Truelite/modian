@@ -13,7 +13,8 @@ class Hardware:
     Hardware detection and operations
     """
 
-    def __init__(self):
+    def __init__(self, env_config):
+        self.env_config = env_config
         # In bash this was ``if efibootmgr > /dev/null 2>&1``
         self.uefi = False
         try:
@@ -121,6 +122,7 @@ class Hardware:
             capture_output=True
         )
         for line in fdisk_res.stdout.split(b'\n'):
+            line = line.decode()
             if line.startswith("Disk {}".format(disk)):
                 return int(line.split()[2].split(".")[0])
 
@@ -152,6 +154,63 @@ class Hardware:
     def umount_partitions_from_target_drive(self):
         """
         """
+
+    def get_partition_disk_name(self, disk, number):
+        """
+        Get the device name of the partition <number> on <disk>
+        """
+        device_name = disk.strip("/dev/")
+        if device_name.startswith("sd"):
+            # sata disk: the partition number is simply appended
+            return "{disk}{number}".format(disk=disk, number=number)
+        elif device_name.startswith("nvme"):
+            # nvme disk: there is a p between the name of the disk and
+            # the partition number
+            return "{disk}p{number}".format(disk=disk, number=number)
+        else:
+            raise ModianError("Unsupported disk type {}".format(disk))
+
+    def partition_disk(self, device, recipe):
+        # wipe MBR
+        self.run_cmd_stop_errors([
+            "sgdisk", "--zap-all", device
+        ])
+        self.run_cmd_stop_errors([
+            "dd",
+            "if=/dev/zero",
+            'of={}'.format(device),
+            "bs=446",
+            "count=1",
+            "status=none",
+        ])
+        disksizeGiB = self.get_GiB_disk_size(device)
+
+        if disksizeGiB < 32:
+            recipe_fname = "{}-32G.parted"
+        else:
+            recipe_fname = "{}.parted"
+
+        partition_table_recipe = os.path.join(
+            self.env_config["datadir"],
+            recipe_fname.format(recipe)
+        )
+
+        log.info("Partitioning disk %s", device)
+
+        with open(partition_table_recipe, "r") as fp:
+            for line in fp:
+                if line:
+                    self.run_cmd_stop_errors([
+                        "parted",
+                        "-s",
+                        "-a", "optimal",
+                        device,
+                        "--",
+                        *line.split(),
+                    ])
+
+        self.run_cmd_stop_errors(["partx", "-u", device])
+        self.run_cmd_stop_errors(["partx", "-s", device])
 
     def format_device(self, label, device):
         """

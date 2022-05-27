@@ -78,7 +78,7 @@ class Installer:
         return size
 
     def max_num_of_iso_storage(self):
-        hardware = modian_install.hardware.Hardware()
+        hardware = modian_install.hardware.Hardware(env_config=None)
         labels = dict(hardware.list_partition_labels())
         rootDiskBasePath = "/dev/"
         rootDiskPath = rootDiskBasePath + labels.get(

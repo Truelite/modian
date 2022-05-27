@@ -70,31 +70,6 @@ getGiBdisksize()
 	echo ${size_with_decimal%.*}
 }
 
-# Partition a disk given its device and the name of the parted recipe
-# Example: partition_disk /dev/sda ssd
-partition_disk()
-{
-    DEVICE="$1"
-    RECIPE="$2"
-
-    # cancellazione MBR
-    sgdisk --zap-all "$DEVICE"
-    dd if=/dev/zero of="$DEVICE" bs=446 count=1 status=none
-    
-    local disksizeGiB=$(getGiBdisksize "$DEVICE")
-    local partitionTableRecipe=${DATADIR}/${RECIPE}.parted
-    if (( $disksizeGiB < 32 )); then
-	#disk size < 32GiB, use small partition table 
-	partitionTableRecipe=${DATADIR}/${RECIPE}-32G.parted
-    fi	    
-    # partizionamento
-    progress "Partitioning disk ${DEVICE}"
-    while read -r cmd; do parted -s -a optimal "$DEVICE" -- $cmd; done < $partitionTableRecipe
-
-    partx -u "$DEVICE"
-    partx -s "$DEVICE"
-}
-
 # Format the given device using the given label
 format()
 {
@@ -107,25 +82,6 @@ format()
     umount $DEVICE || true
     mkfs.ext4 -q -F -L $label $DEVICE
     tune2fs -c 0 -i 1m $DEVICE
-}
-
-# Format the log partition
-format_part_log()
-{
-    format '##log##' /dev/$PART_LOG
-}
-
-# Format the data partition
-format_part_data()
-{
-    local DEVICE=/dev/$PART_DATA
-    format '##data##' $DEVICE
-
-    # Create initial directory structure
-    mount $DEVICE /mnt
-    mkdir -p /mnt/images/inkjet
-    mkdir -p /mnt/cfast
-    umount /mnt
 }
 
 # Format the images partition
@@ -157,39 +113,6 @@ getPartitionDiskName()
     fi
     echo "Error no diskName ${diskName} found"
     exit 1
-}
-
-# Setup partitions on the SSD
-setup_disk_root()
-{
-    local DISKNAME DEVICE
-    DISKNAME="$DISK_ROOT"
-    DEVICE="/dev/${DISK_ROOT}"
-
-    progress "$DEVICE: partitioning root disk"
-    if [ $IS_UEFI = true ]
-    then
-        partition_disk "$DEVICE" systemdisk-uefi
-    else
-        partition_disk "$DEVICE" systemdisk-bios
-    fi
-    PART_ROOT=$(getPartitionDiskName "${DISKNAME}" "1")
-    #PART_ROOT=${DISKNAME}1
-    PART_LOG=$(getPartitionDiskName "${DISKNAME}" "2")
-    #PART_LOG=${DISKNAME}2
-    PART_DATA=$(getPartitionDiskName "${DISKNAME}" "3")
-    #PART_DATA=${DISKNAME}3
-    PART_ESP=$(getPartitionDiskName "${DISKNAME}" "4")
-    #PART_ESP=${DISKNAME}4
-
-    # Formattazione 
-    format_part_root
-    format_part_log
-    format_part_data
-    if [ $IS_UEFI = true ]
-    then
-        format_part_esp
-    fi
 }
 
 setup_disk_images()

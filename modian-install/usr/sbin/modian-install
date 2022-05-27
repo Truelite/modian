@@ -24,12 +24,12 @@ set -e
 if [ "$TEST_FIRST_INSTALL" = 1 ]
 then
     # load from local directory
-    DATADIR=usr/share/modian-install
-    ETCDIR=etc/modian
+    export DATADIR=usr/share/modian-install
+    export ETCDIR=etc/modian
 else
     # load from the systemwide installation
-    DATADIR=/usr/share/modian-install
-    ETCDIR=/etc/modian
+    export DATADIR=/usr/share/modian-install
+    export ETCDIR=/etc/modian
 fi
 
 # look for a custom installation script, or fall back to the default one

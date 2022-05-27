@@ -13,15 +13,15 @@
     - name: set the modian release name
       lineinfile:
         path: /etc/modian/config.sh
-        line: 'MODIAN_RELEASE_NAME="0.1"'
+        line: 'export MODIAN_RELEASE_NAME="0.1"'
         regexp: 'MODIAN_RELEASE_NAME="'
     - name: set the modian release full name
       lineinfile:
         path: /etc/modian/config.sh
-        line: 'MODIAN_RELEASE_FULL_NAME="0.1.0"'
+        line: 'export MODIAN_RELEASE_FULL_NAME="0.1.0"'
         regexp: 'MODIAN_RELEASE_FULL_NAME="'
     - name: raise the number of versions kept
       lineinfile:
         path: /etc/modian/config.sh
-        line: 'MAX_INSTALLED_VERSIONS=4'
+        line: 'export MAX_INSTALLED_VERSIONS=4'
         regexp: 'MAX_INSTALLED_VERSIONS="'

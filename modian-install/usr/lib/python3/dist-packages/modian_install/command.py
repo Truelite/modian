@@ -67,7 +67,7 @@ class InstallCommand:
 
         self.env_config = self.read_configuration_from_env()
 
-        self.hardware = self.HARDWARE_CLASS()
+        self.hardware = self.HARDWARE_CLASS(env_config = self.env_config)
 
         if system_class is None:
             system_class = self.SYSTEM_CLASS
@@ -90,6 +90,7 @@ class InstallCommand:
             "systemd_target": os.getenv("SYSTEMD_TARGET"),
             "installed_boot_append": os.getenv("INSTALLED_BOOT_APPEND"),
             "max_installed_versions": os.getenv("MAX_INSTALLED_VERSIONS"),
+            "datadir": os.getenv("DATADIR"),
         }
         return env_config
 

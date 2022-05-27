@@ -64,24 +64,26 @@ class Actions:
             log.info("removing %s physical volume", pv)
             subprocess.run(["pvremove", "-f", pv])
 
-    def do_format_part_root(self):
-        part_root = os.path.join(
+    def do_format_part_root(self, part_root=None):
+        part_root = part_root or os.path.join(
             "/dev",
             self.system.partitions[self.system.LABELS["root"]].dev,
+        )
+        disk_root = os.path.join(
+            "/dev",
+            self.system.disk_root.name,
         )
         self.hardware.format_device("##root##", part_root)
         if not self.hardware.uefi:
             # Install grub and initial system disk structure,
             log.info("Installing GRUB")
             self.hardware.run_cmd_stop_errors(["mount", part_root, "/mnt"])
-            log.info("partition has been mounted")
-            subprocess.run("mount")
             # Legacy system
             self.hardware.run_cmd_stop_errors([
                 "grub-install",
                 "--no-floppy",
                 "--root-directory=/mnt",
-                part_root
+                disk_root
             ])
             log.info("grub has been installed")
             # TODO: change this with the right python call
@@ -100,20 +102,20 @@ class Actions:
                     self.env_config["max_installed_versions"]
                 ),
                 "--boot-append={}".format(
-                    self.env.config["installed_boot_append"]
+                    self.env_config["installed_boot_append"]
                 ),
                 "--systemd-target={}".format(
-                    self.env.config["systemd_target"]
+                    self.env_config["systemd_target"]
                 ),
             ])
             subprocess.run(["umount", "/mnt"])
 
-    def do_format_part_esp(self):
-        part_esp = os.path.join(
+    def do_format_part_esp(self, part_esp=None, part_root=None):
+        part_esp = part_esp or os.path.join(
             "/dev",
             self.system.partitions[self.system.LABELS["esp"]].dev,
         )
-        part_root = os.path.join(
+        part_root = part_root or os.path.join(
             "/dev",
             self.system.partitions[self.system.LABELS["root"]].dev,
         )
@@ -133,7 +135,7 @@ class Actions:
                 "--no-floppy",
                 "--efi-directory=/boot/efi",
                 "--root-directory=/mnt",
-                part_root
+                disk_root
             ])
             # TODO: change this with the right python call
             self.hardware.run_cmd_stop_errors([
@@ -151,11 +153,58 @@ class Actions:
                     self.env_config["max_installed_versions"]
                 ),
                 "--boot-append={}".format(
-                    self.env.config["installed_boot_append"]
+                    self.env_config["installed_boot_append"]
                 ),
                 "--systemd-target={}".format(
-                    self.env.config["systemd_target"]
+                    self.env_config["systemd_target"]
                 ),
             ])
             self.hardware.run_cmd_stop_errors(["umount", "/boot/uefi"])
             self.hardware.run_cmd_stop_errors(["umount", "/mnt"])
+
+    def do_format_part_log(self, part_log=None):
+        part_log = part_log or os.path.join(
+            "/dev",
+            self.system.partitions[self.system.LABELS["log"]].dev,
+        )
+        self.hardware.format_device("##log##", part_log)
+
+    def do_format_part_data(self, part_data=None):
+        part_data = part_data or os.path.join(
+            "/dev",
+            self.system.partitions[self.system.LABELS["data"]].dev,
+        )
+        self.hardware.format_device("##data##", part_data)
+
+        # Create initial directory structure
+        self.hardware.run_cmd_stop_errors(["mount", part_data, "/mnt"])
+        os.makedirs("/mnt/images/inkjet")
+        os.makedirs("/mnt/cfast")
+        self.hardware.run_cmd_stop_errors(["umount", "/mnt"])
+
+    def do_setup_disk_root(self):
+        disk_root = os.path.join(
+            "/dev",
+            self.system.disk_root.name,
+        )
+        log.info("%s: partitioning root disk", disk_root)
+
+        if self.hardware.uefi:
+            self.hardware.partition_disk(disk_root, "systemdisk-uefi")
+        else:
+            self.hardware.partition_disk(disk_root, "systemdisk-bios")
+
+        self.do_format_part_root(
+            self.hardware.get_partition_disk_name(disk_root, 1),
+        )
+        self.do_format_part_log(
+            self.hardware.get_partition_disk_name(disk_root, 2),
+        )
+        self.do_format_part_data(
+            self.hardware.get_partition_disk_name(disk_root, 3),
+        )
+        if self.hardware.uefi:
+            self.do_format_part_esp(
+                self.hardware.get_partition_disk_name(disk_root, 4),
+                self.hardware.get_partition_disk_name(disk_root, 1),
+            )
