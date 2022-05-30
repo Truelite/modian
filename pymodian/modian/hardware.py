@@ -303,10 +303,24 @@ class System:
             x.name: x for x in Blockdev.list(hardware)}
         self.labels: Dict[str, str] = dict(
             self.hardware.list_partition_labels())
-        self.disk_inst: Optional[Blockdev] = None
-        self.disk_root: Optional[Blockdev] = None
+        self._disk_inst: Optional[Blockdev] = None
+        self._disk_root: Optional[Blockdev] = None
         # Partitions indexed by label
         self.partitions: Dict[str, Partition] = {}
+
+    @property
+    def disk_inst(self) -> Blockdev:
+        if self._disk_inst is None:
+            raise ModianError("installation disk not detected")
+        else:
+            return self._disk_inst
+
+    @property
+    def disk_root(self) -> Blockdev:
+        if self._disk_root is None:
+            raise ModianError("root disk not detected")
+        else:
+            return self._disk_root
 
     def _check_partition(self, label: str, disk: Blockdev) -> bool:
         """
@@ -385,12 +399,12 @@ class System:
         devs: List[Blockdev] = []
         for bd in self.blockdevs.values():
             if bd.name == live_media_dev_name:
-                self.disk_inst = bd
+                self._disk_inst = bd
                 continue
             devs.append(bd)
 
         ok = True
-        if self.disk_inst is None:
+        if self._disk_inst is None:
             log.error(
                 "live install media device %r not found", live_media_dev_name
             )
@@ -404,22 +418,22 @@ class System:
             log.info(
                 "selected the only disk %s as the root device", devs[0].name
             )
-            self.disk_root = devs[0]
+            self._disk_root = devs[0]
         else:
             # Try selecting the image device as the biggest one
             devs.sort(key=lambda x: x.size)
             if devs[0].size == devs[1].size:
                 devs.sort(key=lambda x: x.name)
-                self.disk_root = devs[0]
+                self._disk_root = devs[0]
                 log.info(
                     "Selected %s as root, as the first name of the two",
-                    self.disk_root,
+                    self._disk_root,
                 )
             else:
-                self.disk_root = devs[0]
+                self._disk_root = devs[0]
                 log.info(
                     "Selected %s as root, as the smallest of two",
-                    self.disk_root,
+                    self._disk_root,
                 )
         return ok, devs
 
@@ -492,11 +506,8 @@ class System:
 
         # If the iso image volume name is "firstinstall", then we always run a
         # first install
-        if self.disk_inst is None:
-            raise ModianError("installation disk not detected")
-        else:
-            iso_volume_id = self.hardware.read_iso_volume_id(
-                self.disk_inst.device)
+        iso_volume_id = self.hardware.read_iso_volume_id(
+            self.disk_inst.device)
         log.debug("ISO volume id is '%s'", iso_volume_id)
         if iso_volume_id == "firstinstall":
             log.info(
