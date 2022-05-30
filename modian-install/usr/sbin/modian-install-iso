@@ -10,8 +10,6 @@ import shlex
 import socket
 import time
 import sys
-import importlib
-from collections import defaultdict
 
 import modian
 
@@ -185,7 +183,7 @@ class Installer:
                 "%s: mark that installation was successful", self.inst_dir
             )
             subprocess.run(["sync"], check=True)
-            with open("install-successful", "wb") as fd:
+            with open("install-successful", "wb"):
                 pass
             subprocess.run(["sync"], check=True)
 
@@ -280,7 +278,7 @@ class Installer:
 
         try:
             self.do_install_target(iso, check_integrity)
-        except:
+        except Exception:
             self.rollback()
             raise
 
