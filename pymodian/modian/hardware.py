@@ -20,10 +20,11 @@ class Hardware:
 
     def __init__(self, env_config: Config):
         self.env_config = env_config
-        # In bash this was ``if efibootmgr > /dev/null 2>&1``
+        # Check if we are on a UEFI system
         self.uefi = False
         try:
-            res = subprocess.run('efibootmgr')
+            res = subprocess.run(['efibootmgr'],
+                                 capture_output=True, check=False)
             if res.returncode == 0:
                 self.uefi = True
         except FileNotFoundError:
@@ -121,12 +122,9 @@ class Hardware:
         """
         return the disk size in GiB
         """
-        fdisk_res = subprocess.run(
-            ["fdisk", "-l"],
-            capture_output=True
-        )
-        for bline in fdisk_res.stdout.split(b'\n'):
-            line = bline.decode()
+        fdisk_res = self.run_cmd_stop_errors(
+            ["fdisk", "-l"], capture_output=True, text=True)
+        for line in fdisk_res.stdout.splitlines():
             if line.startswith("Disk {disk}"):
                 return int(line.split()[2].split(".")[0])
 
@@ -156,7 +154,7 @@ class Hardware:
         Disable any swap partition.
         """
         log.info("Disabling swap")
-        subprocess.run(["swapoff", "-a"])
+        self.run_cmd_stop_errors(["swapoff", "-a"])
 
     def get_partition_disk_name(self, disk: str, number: int) -> str:
         """
@@ -231,7 +229,7 @@ class Hardware:
         # If the partition is mounted we try to umount it; if it fails
         # because the partition wasn't mounted it's ok, for any other
         # error mkfs will refuse to work anyway.
-        subprocess.run(["umount", device])
+        subprocess.run(["umount", device], check=False)
         self.run_cmd_stop_errors([
             "mkfs.ext4", "-q", "-F", "-L", label, device
         ])
@@ -565,7 +563,7 @@ class System:
         if self.disk_root is not None:
             for line in mounts:
                 if self.disk_root.name in line:
-                    subprocess.run(["umount", line.split()[0]])
+                    subprocess.run(["umount", line.split()[0]], check=False)
                     mounts.remove(line)
 
         return mounts

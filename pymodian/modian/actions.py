@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
-from typing import List, TYPE_CHECKING
+from typing import Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from . import hardware
@@ -36,9 +36,11 @@ class Actions:
         log.info("Running action %s", action)
         action_method()
 
-    def _stdout_lines_from_command(self, command: List[str]):
-        res = subprocess.run(command, stdout=subprocess.PIPE, check=True)
-        for line in res.stdout.split(b"\n"):
+    def _stdout_lines_from_command(self, command: List[str]) \
+            -> Generator[str, None, None]:
+        res = self.hardware.run_cmd_stop_errors(
+            command, stdout=subprocess.PIPE)
+        for line in res.stdout.splitlines():
             # we only provide lines with some content
             if line:
                 yield line.decode()
@@ -47,15 +49,15 @@ class Actions:
         for lv in self._stdout_lines_from_command(
                 ["lvs", "--noheadings", "-o", "lvname"]):
             log.info("removing %s logical volume", lv)
-            subprocess.run(["lvremove", "-f", lv])
+            subprocess.run(["lvremove", "-f", lv], check=False)
         for vg in self._stdout_lines_from_command(
                 ["vgs", "--noheadings", "-o", "vgname"]):
             log.info("removing %s volume group", vg)
-            subprocess.run(["vgremove", "-f", vg])
+            subprocess.run(["vgremove", "-f", vg], check=False)
         for pv in self._stdout_lines_from_command(
                 ["pvs", "--noheadings", "-o", "pvname"]):
             log.info("removing %s physical volume", pv)
-            subprocess.run(["pvremove", "-f", pv])
+            subprocess.run(["pvremove", "-f", pv], check=False)
 
     def do_format_part_root(self, part_root: str = None):
         part_root = part_root or os.path.join(
@@ -96,7 +98,7 @@ class Actions:
                 f"--boot-append={cfg.installed_boot_append}",
                 f"--systemd-target={self.env_config.systemd_target}",
             ])
-            subprocess.run(["umount", "/mnt"])
+            subprocess.run(["umount", "/mnt"], check=False)
 
     def do_format_part_esp(self, part_esp=None, part_root=None):
         part_esp = part_esp or os.path.join(

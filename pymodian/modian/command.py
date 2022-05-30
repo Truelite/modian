@@ -181,7 +181,7 @@ class InstallCommand:
                 subprocess.run([
                     '/usr/sbin/modian-run-action',
                     action
-                ], env=env)
+                ], env=env, check=True)
 
     def main(self):
         self.setup()
