@@ -12,6 +12,6 @@ log = logging.getLogger()
 if __name__ == "__main__":
     try:
         modian.command.InstallCommand().main()
-    except modian.actions.ModianError as e:
+    except modian.exceptions.ModianError as e:
         log.error("%s", e)
         sys.exit(1)

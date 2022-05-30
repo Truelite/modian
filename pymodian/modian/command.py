@@ -10,7 +10,7 @@ import subprocess
 
 from typing import Dict, Optional, Type
 
-from . import hardware, actions
+from . import hardware, actions, exceptions
 from .config import Config
 
 
@@ -175,7 +175,7 @@ class InstallCommand:
         for action in self.action_list:
             try:
                 self.actions.run_action(action)
-            except actions.ActionNotImplementedError:
+            except exceptions.ActionNotImplementedError:
                 subprocess.run([
                     '/usr/sbin/modian-run-action',
                     action

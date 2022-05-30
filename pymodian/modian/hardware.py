@@ -7,7 +7,7 @@ import shlex
 import subprocess
 from typing import Dict, Generator, List, Optional, Tuple
 
-from .actions import ModianError
+from .exceptions import ModianError
 from .config import Config
 
 log = logging.getLogger()

@@ -150,6 +150,6 @@ class Command(modian.command.InstallCommand):
 if __name__ == "__main__":
     try:
         Command().main()
-    except modian.actions.ModianError as e:
+    except modian.exceptions.ModianError as e:
         log.error("%s", e)
         sys.exit(1)
