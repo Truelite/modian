@@ -1,7 +1,7 @@
 ---
 - name: Install custom packages
   apt:
-    name: cowsay,fortune
+    name: cowsay,fortune,task-lxde-desktop
     state: present
 - name: Install the custom installation script
   copy:
