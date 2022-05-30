@@ -37,15 +37,17 @@ case $SUBCMD in
         ;;
     "qa")
         cd $root
-        flake8 siweb tests
-        isort --check-only --diff siweb tests
+        flake8 modian tests
+        isort --check-only --diff modian tests
         doc8 .
         cd -
         ;;
     "typecheck")
-        mypy siweb tests --namespace-packages "$@"
+        cd $root
+        mypy modian tests --namespace-packages "$@"
         ;;
     "static")
+        cd $root
         bandit --recursive --number=3 -lll -iii .
         ;;
     *)
