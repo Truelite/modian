@@ -1,0 +1,12 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pymodian
+Upstream-Contact: Truelite S.r.l. <info@truelite.it>
+Source: https://gitlab.truelite.it/system/modian
+
+Files: *
+Copyright: 2022 Truelite S.r.l. <info@truelite.it>
+License: GPL-3+
+
+Files: debian/*
+Copyright: 2022 Truelite S.r.l. <info@truelite.it>
+License: GPL-3+

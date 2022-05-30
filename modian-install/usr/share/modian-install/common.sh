@@ -58,241 +58,14 @@ fail()
     exit 1
 }
 
-#return the disk size in GiB
-#Parameter device name (ex: /dev/sda)
-getGiBdisksize()
-{
-	local size_with_decimal=$(fdisk -l | grep "Disk $1" | awk '{ print $3}')
-	#remove decimal
-	echo ${size_with_decimal%.*}
-}
-
-# Partition a disk given its device and the name of the parted recipe
-# Example: partition_disk /dev/sda ssd
-partition_disk()
-{
-    DEVICE="$1"
-    RECIPE="$2"
-
-    # cancellazione MBR
-    sgdisk --zap-all "$DEVICE"
-    dd if=/dev/zero of="$DEVICE" bs=446 count=1 status=none
-    
-    local disksizeGiB=$(getGiBdisksize "$DEVICE")
-    local partitionTableRecipe=${DATADIR}/${RECIPE}.parted
-    if (( $disksizeGiB < 32 )); then
-	#disk size < 32GiB, use small partition table 
-	partitionTableRecipe=${DATADIR}/${RECIPE}-32G.parted
-    fi	    
-    # partizionamento
-    progress "Partitioning disk ${DEVICE}"
-    while read -r cmd; do parted -s -a optimal "$DEVICE" -- $cmd; done < $partitionTableRecipe
-
-    partx -u "$DEVICE"
-    partx -s "$DEVICE"
-}
-
-# Format the given device using the given label
-format()
-{
-    local label="$1"
-    local DEVICE="$2"
-    progress "$DEVICE: setting up $label partition"
-    # If the partition is mounted we try to umount it; if it fails because the
-    # partition wasn't mounted it's ok, for any other error mkfs will refuse to
-    # work anyway.
-    umount $DEVICE || true
-    mkfs.ext4 -q -F -L $label $DEVICE
-    tune2fs -c 0 -i 1m $DEVICE
-}
-
-# Format the root partition
-format_part_root()
-{
-    format '##root##' /dev/$PART_ROOT
-    if [ $IS_UEFI != true ]
-    then
-        # Install grub and initial system disk structure,
-        progress "Installing GRUB"
-        mount /dev/$PART_ROOT /mnt
-        # Legacy system
-        grub-install --no-floppy --root-directory=/mnt /dev/$DISK_ROOT
-	install -m 0644 /usr/share/grub/unicode.pf2 /mnt/boot/grub
-        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS --boot-append=$INSTALLED_BOOT_APPEND --systemd-target=$SYSTEMD_TARGET
-        umount /mnt
-    fi
-}
-
-# Format the ESP partition
-format_part_esp()
-{
-    local DEVICE="$PART_ESP"
-    progress "$DEVICE: setting up ESP partition"
-    mkfs.vfat /dev/$DEVICE
-    if [ $IS_UEFI = true ]
-    then
-        # Install grub and initial system disk structure,
-        progress "Installing GRUB"
-        mount /dev/$PART_ROOT /mnt
-        # UEFI system
-
-        # Mount ESP partition
-        mkdir -p /boot/efi
-        mount /dev/$PART_ESP /boot/efi
-        grub-install --no-floppy --efi-directory=/boot/efi --root-directory=/mnt /dev/$DISK_ROOT
-        install -m 0644 /usr/share/grub/unicode.pf2 /mnt/boot/grub
-        modian-install-iso --live-dir=/mnt --no-check-integrity $MODIAN_RELEASE_NAME --isoimage /dev/$DISK_INST --max-installed-versions=$MAX_INSTALLED_VERSIONS --boot-append=$INSTALLED_BOOT_APPEND --systemd-target=$SYSTEMD_TARGET
-        umount /boot/efi
-	umount /mnt
-    fi
-}
-
-# Format the log partition
-format_part_log()
-{
-    format '##log##' /dev/$PART_LOG
-}
-
-# Format the data partition
-format_part_data()
-{
-    local DEVICE=/dev/$PART_DATA
-    format '##data##' $DEVICE
-
-    # Create initial directory structure
-    mount $DEVICE /mnt
-    mkdir -p /mnt/images/inkjet
-    mkdir -p /mnt/cfast
-    umount /mnt
-}
-
-# Format the images partition
-format_part_images()
-{
-    format '##images##' /dev/$PART_IMAGES
-}
-
-# Clean lvm groups
-clean_lvm_groups()
-{
-    for lv in $(lvs --noheadings -o lvname)
-    do
-        verbose "removing ${lv} logical volume"
-        lvremove -f ${lv}
-    done
-    for vg in $(vgs --noheadings -o vgname)
-    do
-        verbose "removing ${vg} logical volume"
-        vgremove -f ${vg}
-    done
-    for pv in $(pvs --noheadings -o pvname)
-    do
-        verbose "removing ${pv} phisical volume"
-        pvremove -f ${pv}
-    done
-}
-
-#This function returm the partition name
-#Param 1: diskname
-#Param 2: partition number
-getPartitionDiskName() 
-{
-    local nvmeDisk="nvme"
-    local sataDisk="sd"
-    local diskName="$1"
-    local partitionNumber="$2"	
-    if [ -z "${diskName##*$nvmeDisk*}" ] ;then
-	#Nel caso di disco nvme devo aggiungere oltre al numero anche la lettera p
-	#Esempio nomedisco nvme0n1 --> la partizione 1 diventa --> nvme0n1p1
-	echo "${diskName}p${partitionNumber}"
-	exit 0
-    fi
-    if [ -z "${diskName##*$sataDisk*}" ] ;then
-	#Nel caso di disco sata sd devo aggiungere solamente il numero
-	#Esempio nomedisco sda --> la partizione 1 diventa --> sda1
-	echo "${diskName}${partitionNumber}"
-	exit 0
-    fi
-    echo "Error no diskName ${diskName} found"
-    exit 1
-}
-
-# Setup partitions on the SSD
-setup_disk_root()
-{
-    local DISKNAME DEVICE
-    DISKNAME="$DISK_ROOT"
-    DEVICE="/dev/${DISK_ROOT}"
-
-    progress "$DEVICE: partitioning root disk"
-    if [ $IS_UEFI = true ]
-    then
-        partition_disk "$DEVICE" systemdisk-uefi
-    else
-        partition_disk "$DEVICE" systemdisk-bios
-    fi
-    PART_ROOT=$(getPartitionDiskName "${DISKNAME}" "1")
-    #PART_ROOT=${DISKNAME}1
-    PART_LOG=$(getPartitionDiskName "${DISKNAME}" "2")
-    #PART_LOG=${DISKNAME}2
-    PART_DATA=$(getPartitionDiskName "${DISKNAME}" "3")
-    #PART_DATA=${DISKNAME}3
-    PART_ESP=$(getPartitionDiskName "${DISKNAME}" "4")
-    #PART_ESP=${DISKNAME}4
-
-    # Formattazione 
-    format_part_root
-    format_part_log
-    format_part_data
-    if [ $IS_UEFI = true ]
-    then
-        format_part_esp
-    fi
-}
-
-setup_disk_images()
-{
-    local DISKNAME DEVICE
-    DISKNAME="$DISK_IMG"
-    if [ -z "$DISK_IMG" ]
-    then
-        return
-    fi
-    DEVICE="/dev/${DISK_IMG}"
-
-    progress "$DEVICE: partitioning images disk"
-    partition_disk "$DEVICE" datadisk
-    PART_IMAGES=$(getPartitionDiskName "${DISKNAME}" "1")
-    #PART_IMAGES="${DISKNAME}1"
-
-    # Formattazione 
-    format_part_images
-
-}
+# Read the config.sh (this should really happen in the python command, however)
+. /etc/modian/config.sh
 
 do_first_install()
 {
-    progress "Disk and partition detection"
-    TMPFILE=$(mktemp)
-    if [ $IS_UEFI = true ]
-    then
-	modian-install-detect --uefi --debug > $TMPFILE
-    else
-	modian-install-detect --debug > $TMPFILE
-    fi
-    cat $TMPFILE >> $RUN_INFO_FILE
-    source $TMPFILE
-    rm $TMPFILE
-    verbose "Detected system disk: $DISK_ROOT ($(cat /sys/block/$DISK_ROOT/device/model))"
-    if [ -n "${DISK_IMG}" ]; then
-        verbose "Detected data disk: $DISK_IMG ($(cat /sys/block/$DISK_IMG/device/model))"
-    fi
-    verbose "Detected uSB disk: $DISK_INST ($(cat /sys/block/$DISK_INST/device/model))"
-    verbose "Detected root partition: ${PART_ROOT:-none}"
-    verbose "Detected log partition: ${PART_LOG:-none}"
-    verbose "Detected data partition: ${PART_DATA:-none}"
-    verbose "Detected images partition: ${PART_IMAGES:-none}"
-    verbose "Detected first install actions: $ACTIONS"
+    return
+
+    # this is ignored, even if it still has to be migrated
 
     progress "Data partition detection"
     TMPDIR=$(mktemp -d)
@@ -309,15 +82,7 @@ do_first_install()
         fi
     done
 
-    # tune2fs wants /etc/mtaFirst install a in order to run: creating it if it is missing
-    progress "Creating mtab"
-    test -e /etc/mtab || ln -s /proc/mounts /etc/mtab
-
-    # In case booting detected a swap partition and enabled it, disable all swap now so hard disks are not used anymore
-    progress "Disabling swap"
-    swapoff -a
-
-    # Umount all partitions from the target drives (fist images then others)
+    # Umount all partitions from the target drives
     if [ -n "$DISK_IMG" ]
     then
         for dev in $(grep ^/dev/$DISK_IMG /proc/mounts | sed -re 's/[[:space:]].+//')
@@ -332,12 +97,6 @@ do_first_install()
         umount $dev
     done
     echo ""
-
-    progress "performing partitioning and file system creation"
-    for a in $ACTIONS
-    do
-	$a
-    done
 
     progress "Restore data partition"
     if [ -d ${BACKUPDIR}/System ]; then

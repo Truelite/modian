@@ -10,17 +10,8 @@ import shlex
 import socket
 import time
 import sys
-import importlib
-from collections import defaultdict
 
-
-def load_script(name):
-    from importlib.machinery import SourceFileLoader
-
-    return SourceFileLoader("detect", name).load_module()
-
-
-detect = load_script("/usr/sbin/modian-install-detect")
+import modian
 
 log = logging.getLogger(__name__)
 
@@ -85,10 +76,12 @@ class Installer:
         return size
 
     def max_num_of_iso_storage(self):
-        hardware = detect.Hardware()
+        hardware = modian.hardware.Hardware(env_config=None)
         labels = dict(hardware.list_partition_labels())
         rootDiskBasePath = "/dev/"
-        rootDiskPath = rootDiskBasePath + labels.get(detect.LABEL_ROOT)
+        rootDiskPath = rootDiskBasePath + labels.get(
+            modian.hardware.System.LABELS["root"]
+        )
         log.info("Disco root: %s", rootDiskPath)
         size = self.get_GiB_diskSize(rootDiskPath)
         log.info("Disco root: %s Size %s GiB", rootDiskPath, size)
@@ -190,7 +183,7 @@ class Installer:
                 "%s: mark that installation was successful", self.inst_dir
             )
             subprocess.run(["sync"], check=True)
-            with open("install-successful", "wb") as fd:
+            with open("install-successful", "wb"):
                 pass
             subprocess.run(["sync"], check=True)
 
@@ -285,7 +278,7 @@ class Installer:
 
         try:
             self.do_install_target(iso, check_integrity)
-        except:
+        except Exception:
             self.rollback()
             raise
 

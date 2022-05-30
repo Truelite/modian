@@ -19,9 +19,9 @@
 GRUBCFG=/mnt/boot/grub/grub.cfg
 # Set the following two variables to a sensible value in the ansible script
 # that generates the target chroot.
-MODIAN_RELEASE_NAME="<modian_release_name>"
-MODIAN_RELEASE_FULL_NAME='<modian_release_full_name>'
-HOSTNAME=$(hostname)
-DIR_BOOTSCRIPT=/etc/modian/boot.d
-SYSTEMD_TARGET=default.target
-INSTALLED_BOOT_APPEND=""
+export MODIAN_RELEASE_NAME="<modian_release_name>"
+export MODIAN_RELEASE_FULL_NAME='<modian_release_full_name>'
+export HOSTNAME=$(hostname)
+export DIR_BOOTSCRIPT=/etc/modian/boot.d
+export SYSTEMD_TARGET=default.target
+export INSTALLED_BOOT_APPEND=""

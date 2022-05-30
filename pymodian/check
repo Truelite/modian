@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -lt 1 ]
+then
+    $0 coverage
+    $0 typecheck
+    $0 qa
+    exit 0
+fi
+
+root=$(readlink -f $(dirname $0))
+EATMYDATA="`which eatmydata`" || EATMYDATA=""
+
+# print deprecation warnings etc.
+export PYTHONDEVMODE=1
+
+# ignore known warnings from third party libraries, because we have no control
+# on them; this list should be updated when moving over to a new release.
+# see also https://docs.python.org/3/library/warnings.html#warning-filter
+export PYTHONWARNINGS=''
+
+SUBCMD=$1
+shift 1
+
+case $SUBCMD in
+    "tests")
+        cd $root
+        $EATMYDATA nose2-3 $@
+        cd -
+        ;;
+    "coverage")
+        cd $root
+        $EATMYDATA nose2-3 --with-coverage --coverage-report=term --verbose $@
+        cd -
+        ;;
+    "qa")
+        cd $root
+        flake8 modian tests
+        isort --check-only --diff modian tests
+        doc8 .
+        cd -
+        ;;
+    "typecheck")
+        cd $root
+        mypy modian tests --namespace-packages "$@"
+        ;;
+    "static")
+        cd $root
+        bandit --recursive --number=3 -lll -iii .
+        ;;
+    *)
+        echo "No such subcommand $SUBCMD"
+        ;;
+esac
