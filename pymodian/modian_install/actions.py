@@ -1,7 +1,13 @@
 from __future__ import annotations
+
 import logging
 import os
 import subprocess
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import hardware
+    from .config import Config
 
 
 log = logging.getLogger()
@@ -27,13 +33,15 @@ class Actions:
     Steps to manipulate the system during the installation.
     """
 
-    def __init__(self, system, hardware, env_config):
+    def __init__(self,
+                 system: hardware.System,
+                 hardware: hardware.Hardware,
+                 env_config: Config):
         self.system = system
         self.hardware = hardware
         self.env_config = env_config
-        self.queue = []
 
-    def run_action(self, action):
+    def run_action(self, action: str):
         try:
             action_method = getattr(self, "do_" + action)
         except AttributeError as e:
@@ -41,7 +49,7 @@ class Actions:
         log.info("Running action %s", action)
         action_method()
 
-    def _stdout_lines_from_command(self, command):
+    def _stdout_lines_from_command(self, command: List[str]):
         res = subprocess.run(command, stdout=subprocess.PIPE)
         for line in res.stdout.split(b"\n"):
             # we only provide lines with some content
@@ -50,22 +58,19 @@ class Actions:
 
     def do_clean_lvm_groups(self):
         for lv in self._stdout_lines_from_command(
-            ["lvs", "--noheadings", "-o", "lvname"]
-        ):
+                ["lvs", "--noheadings", "-o", "lvname"]):
             log.info("removing %s logical volume", lv)
             subprocess.run(["lvremove", "-f", lv])
         for vg in self._stdout_lines_from_command(
-            ["vgs", "--noheadings", "-o", "vgname"]
-        ):
+                ["vgs", "--noheadings", "-o", "vgname"]):
             log.info("removing %s volume group", vg)
             subprocess.run(["vgremove", "-f", vg])
         for pv in self._stdout_lines_from_command(
-            ["pvs", "--noheadings", "-o", "pvname"]
-        ):
+                ["pvs", "--noheadings", "-o", "pvname"]):
             log.info("removing %s physical volume", pv)
             subprocess.run(["pvremove", "-f", pv])
 
-    def do_format_part_root(self, part_root=None):
+    def do_format_part_root(self, part_root: str = None):
         part_root = part_root or os.path.join(
             "/dev",
             self.system.partitions[self.system.LABELS["root"]].dev,

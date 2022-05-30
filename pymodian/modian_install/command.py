@@ -8,6 +8,8 @@ import sys
 import os
 import subprocess
 
+from typing import Dict, Optional, Type
+
 from . import hardware, actions
 from .config import Config
 
@@ -19,9 +21,9 @@ class InstallCommand:
     DESCRIPTION = "Perform the modian first install"
     VERSION = "1.0"
 
-    HARDWARE_CLASS = hardware.Hardware
-    SYSTEM_CLASS = hardware.System
-    ACTIONS_CLASS = actions.Actions
+    HARDWARE_CLASS: Type[hardware.Hardware] = hardware.Hardware
+    SYSTEM_CLASS: Type[hardware.System] = hardware.System
+    ACTIONS_CLASS: Type[actions.Actions] = actions.Actions
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.DESCRIPTION)
@@ -52,7 +54,9 @@ class InstallCommand:
             format="%(asctime)s %(levelname)s %(message)s",
         )
 
-    def setup(self, actions_class=None, system_class=None):
+    def setup(self,
+              actions_class: Optional[Type[actions.Actions]] = None,
+              system_class: Optional[Type[hardware.System]] = None):
         """
         Common command setup tasks including parsing arguments.
 
@@ -142,7 +146,11 @@ class InstallCommand:
         # Umount all partitions from the target drives
         self.system.umount_partitions_target_drives()
 
-    def add_additional_environment(self):
+    def add_additional_environment(self) -> Dict[str, str]:
+        """
+        Override this method to add extra environment variables when running
+        actions
+        """
         return {}
 
     def run_actions(self):
