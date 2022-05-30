@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Truelite team <packages@truelite.it>
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 12), python3-modian
 Standards-Version: 4.5.1
 Rules-Requires-Root: no
 
@@ -15,7 +15,7 @@ Depends: ${misc:Depends},
          grub-pc, grub-efi-amd64-bin, syslinux,
          efibootmgr,
          dosfstools, kbd,
-         kpartx, parted, gdisk, lvm2, python3-parted,
+         kpartx, parted, gdisk, lvm2, python3-parted, python3-modian,
 	 libarchive-tools, beep, python3,
 Description: Modian installation procedures
  This package contains:

@@ -9,7 +9,7 @@ setup(
     author="Truelite S.r.l.",
     author_email="info@truelite.it",
     include_package_data=True,
-    install_requires=[],
+    install_requires=["pyparted"],
     # license="http://www.gnu.org/licenses/agpl-3.0.html",
     packages=["modian"]
 )
