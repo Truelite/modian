@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import logging
 import os
 import re
+import shlex
 import subprocess
+from typing import Dict, Generator, List, Optional, Tuple
 
 from .actions import ModianError
 
@@ -13,7 +17,7 @@ class Hardware:
     Hardware detection and operations
     """
 
-    def __init__(self, env_config):
+    def __init__(self, env_config: Dict[str, str]):
         self.env_config = env_config
         # In bash this was ``if efibootmgr > /dev/null 2>&1``
         self.uefi = False
@@ -24,30 +28,29 @@ class Hardware:
         except FileNotFoundError:
             pass
 
-    def _read_sys_file(self, dev):
+    def _read_sys_file(self, dev: str) -> str:
         with open(dev, "rt") as fd:
             return fd.read().strip()
 
-    def run_cmd_stop_errors(self, cmd, *args, **kw):
+    def run_cmd_stop_errors(self, cmd, *args, **kw) \
+            -> subprocess.CompletedProcess:
         """
         Run a command with subprocess and stop in case of errors
         """
         res = subprocess.run(cmd, *args, **kw)
         if res.returncode != 0:
+            fcmd = " ".join(shlex.quote(c) for c in cmd)
             raise ModianError(
-                "Command ``{}`` failed, returncode is {}".format(
-                    " ".join(cmd),
-                    res.returncode
-                )
+                f"Command ``{fcmd}`` failed, returncode is {res.returncode}"
             )
         return res
 
-    def read_iso_volume_id(self, pathname):
+    def read_iso_volume_id(self, pathname: str) -> str:
         with open(pathname, "rb") as fd:
             fd.seek(0x8028)
             return fd.read(32).decode("utf-8").strip()
 
-    def get_live_media_device(self):
+    def get_live_media_device(self) -> Optional[str]:
         live_media_re = re.compile(
             r"^/dev/(?P<dev>\S+) /run/live/medium iso9660"
         )
@@ -64,15 +67,15 @@ class Hardware:
                             return b_dev
         return None
 
-    def size(self, devname):
+    def size(self, devname: str) -> int:
         return int(self._read_sys_file("/sys/block/{}/size".format(devname)))
 
-    def desc(self, devname):
+    def desc(self, devname: str) -> str:
         return self._read_sys_file(
             "/sys/block/{}/device/model".format(devname)
         )
 
-    def list_devices(self):
+    def list_devices(self) -> Generator[str, None, None]:
         for name in os.listdir("/sys/block"):
             # sd* sata disk
             # nvme* NVM express disk
@@ -80,14 +83,14 @@ class Hardware:
                 continue
             yield name
 
-    def list_partition_labels(self):
+    def list_partition_labels(self) -> Generator[Tuple[str, str], None, None]:
         for name in os.listdir("/dev/disk/by-label"):
             dest = os.path.abspath(
                 os.readlink(os.path.join("/dev/disk/by-label", name))
             )
             yield name, os.path.basename(dest)
 
-    def get_uefi_partition(self, name):
+    def get_uefi_partition(self, name: str) -> Optional[str]:
         import parted
 
         pdev = parted.getDevice("/dev/" + name)
@@ -113,7 +116,7 @@ class Hardware:
         log.info("No ESP partition found in %s", name)
         return None
 
-    def get_GiB_disk_size(self, disk):
+    def get_GiB_disk_size(self, disk: str) -> int:
         """
         return the disk size in GiB
         """
@@ -121,12 +124,15 @@ class Hardware:
             ["fdisk", "-l"],
             capture_output=True
         )
-        for line in fdisk_res.stdout.split(b'\n'):
-            line = line.decode()
-            if line.startswith("Disk {}".format(disk)):
+        for bline in fdisk_res.stdout.split(b'\n'):
+            line = bline.decode()
+            if line.startswith("Disk {disk}"):
                 return int(line.split()[2].split(".")[0])
 
-    def get_disk_model(self, disk):
+        raise ModianError(f"Failed to detect disk size for {disk}"
+                          "(it does not appear in ``fdisk -l`` output)")
+
+    def get_disk_model(self, disk: str) -> str:
         """
         return the model of the disk
 
@@ -151,26 +157,25 @@ class Hardware:
         log.info("Disabling swap")
         subprocess.run(["swapoff", "-a"])
 
-    def umount_partitions_from_target_drive(self):
-        """
-        """
-
-    def get_partition_disk_name(self, disk, number):
+    def get_partition_disk_name(self, disk: str, number: int) -> str:
         """
         Get the device name of the partition <number> on <disk>
         """
         device_name = disk.strip("/dev/")
         if device_name.startswith("sd"):
             # sata disk: the partition number is simply appended
-            return "{disk}{number}".format(disk=disk, number=number)
+            return f"{disk}{number}"
         elif device_name.startswith("nvme"):
             # nvme disk: there is a p between the name of the disk and
             # the partition number
-            return "{disk}p{number}".format(disk=disk, number=number)
+            return f"{disk}p{number}"
         else:
-            raise ModianError("Unsupported disk type {}".format(disk))
+            raise ModianError(f"Unsupported disk type {disk}")
 
-    def partition_disk(self, device, recipe):
+    def partition_disk(self, device: str, recipe: str):
+        """
+        Partition the disk using the parted script with the given name.
+        """
         # wipe MBR
         self.run_cmd_stop_errors([
             "sgdisk", "--zap-all", device
@@ -185,6 +190,11 @@ class Hardware:
         ])
         disksizeGiB = self.get_GiB_disk_size(device)
 
+        # TODO: The current -32G parted file looks like it's supposed to
+        # partition disks larger than 32GiB. However, this check maintains
+        # compatibility with the previous shell code: it could be that one of
+        # the paths was not tested, and that, after investigation, this check
+        # might not be needed anymore
         if disksizeGiB < 32:
             recipe_fname = "{}-32G.parted"
         else:
@@ -212,7 +222,7 @@ class Hardware:
         self.run_cmd_stop_errors(["partx", "-u", device])
         self.run_cmd_stop_errors(["partx", "-s", device])
 
-    def format_device(self, label, device):
+    def format_device(self, label: str, device: str):
         """
         Format a device (e.g. /dev/sda1) with a label.
         """
@@ -232,7 +242,7 @@ class Blockdev:
     Information for a block device
     """
 
-    def __init__(self, hardware, name):
+    def __init__(self, hardware: Hardware, name: str):
         # device name without /dev
         self.name = name
         # Size in 512 byte blocks
@@ -241,20 +251,20 @@ class Blockdev:
         self.desc = hardware.desc(name)
 
     @property
-    def device(self):
+    def device(self) -> str:
         return "/dev/{}".format(self.name)
 
     def __str__(self):
         return self.name
 
     @property
-    def details(self):
+    def details(self) -> str:
         return "{:,}GB, {}".format(
-            int(self.size * 512 / (1000 * 1000 * 1000)), self.desc
+            int(self.size * 512 / (1_000_000_000)), self.desc
         )
 
     @classmethod
-    def list(cls, hardware):
+    def list(cls, hardware: Hardware) -> Generator["Blockdev", None, None]:
         """
         List all sd* or nvme block devices, generating a sequence of
         Blockdev objects.
@@ -266,7 +276,10 @@ class Blockdev:
 
 
 class Partition:
-    def __init__(self, disk, dev, label):
+    """
+    Information about a partition
+    """
+    def __init__(self, disk: Blockdev, dev: str, label: str):
         self.disk = disk
         self.dev = dev
         self.label = label
@@ -283,16 +296,22 @@ class System:
         "esp": "##ESP##",
     }
 
-    def __init__(self, hardware):
+    def __init__(self, hardware: Hardware):
         self.hardware = hardware
-        self.blockdevs = {x.name: x for x in Blockdev.list(hardware)}
-        self.labels = dict(self.hardware.list_partition_labels())
-        self.disk_inst = None
-        self.disk_root = None
-        self.disks = {}
-        self.partitions = {}
+        self.blockdevs: Dict[str, Blockdev] = {
+            x.name: x for x in Blockdev.list(hardware)}
+        self.labels: Dict[str, str] = dict(
+            self.hardware.list_partition_labels())
+        self.disk_inst: Optional[Blockdev] = None
+        self.disk_root: Optional[Blockdev] = None
+        # Partitions indexed by label
+        self.partitions: Dict[str, Partition] = {}
 
-    def _check_partition(self, label, disk):
+    def _check_partition(self, label: str, disk: Blockdev) -> bool:
+        """
+        Check that a partition with the given label exists on the given disk,
+        and if it does, add it to self.partitions
+        """
         dev = self.labels.get(label, None)
         if dev is None:
             log.debug("label %s not found", label)
@@ -316,7 +335,11 @@ class System:
         self.partitions[label] = part
         return True
 
-    def _check_uefi_partition(self, disk):
+    def _check_uefi_partition(self, disk: Blockdev) -> bool:
+        """
+        Check that a UEFI partition exists, and if it does, add it to
+        self.partitions
+        """
         dev = self.hardware.get_uefi_partition(disk.name)
         if dev is None:
             return True
@@ -324,7 +347,7 @@ class System:
         self.partitions[self.LABELS["esp"]] = part
         return True
 
-    def read_additional_partition_labels(self):
+    def read_additional_partition_labels(self) -> bool:
         """
         Override this method to check for additional partitions.
         """
@@ -342,7 +365,7 @@ class System:
                 "inconsistencies found with existing disk partitions"
             )
 
-    def select_disks(self):
+    def select_disks(self) -> Tuple[bool, List[Blockdev]]:
         """
         Select which disk should be used for root or other partitions.
 
@@ -358,7 +381,7 @@ class System:
             log.error("cannot found live media device mounted in /proc/mounts")
             ok = False
 
-        devs = []
+        devs: List[Blockdev] = []
         for bd in self.blockdevs.values():
             if bd.name == live_media_dev_name:
                 self.disk_inst = bd
@@ -371,7 +394,7 @@ class System:
                 "live install media device %r not found", live_media_dev_name
             )
             ok = False
-            return ok
+            return ok, []
 
         if len(devs) == 0:
             log.info("No disk found")
@@ -442,7 +465,7 @@ class System:
 
         self.log_found_devices()
 
-    def compute_firstinstall_actions(self):
+    def compute_firstinstall_actions(self) -> List[str]:
         actions = [
             "clean_lvm_groups",
             "setup_disk_root",
@@ -450,28 +473,36 @@ class System:
         ]
         return actions
 
-    def check_additional_root_disk_partitions(self):
+    def check_additional_root_disk_partitions(self) -> List[str]:
+        """
+        Return a list of extra partition labels currently missing from the root
+        disk
+        """
         return []
 
-    def compute_additional_root_disk_partition_actions(self):
+    def compute_additional_root_disk_partition_actions(self) -> List[str]:
         return []
 
-    def compute_additional_disks_actions(self):
+    def compute_additional_disks_actions(self) -> List[str]:
         return []
 
-    def compute_actions(self):
-        actions = []
+    def compute_actions(self) -> List[str]:
+        actions: List[str] = []
 
         # If the iso image volume name is "firstinstall", then we always run a
         # first install
-        iso_volume_id = self.hardware.read_iso_volume_id(self.disk_inst.device)
+        if self.disk_inst is None:
+            raise ModianError("installation disk not detected")
+        else:
+            iso_volume_id = self.hardware.read_iso_volume_id(
+                self.disk_inst.device)
         log.debug("ISO volume id is '%s'", iso_volume_id)
         if iso_volume_id == "firstinstall":
             log.info(
                 "running a firstinstall key: "
                 + "force complete reinstall of the machine"
             )
-            actions.extend(self.firstinstall_actions())
+            actions.extend(self.compute_firstinstall_actions())
         else:
             # Check whether the mandatory partitions exist
             missing = []
@@ -510,7 +541,7 @@ class System:
 
         return actions
 
-    def umount_partitions_target_drives(self):
+    def umount_partitions_target_drives(self) -> List[str]:
         """
         Umount all partitions from the target drives.
 
@@ -519,9 +550,10 @@ class System:
         """
         with open('/proc/mounts') as fp:
             mounts = fp.readlines()
-        for line in mounts:
-            if self.disk_root.name in line:
-                subprocess.run(["umount", line.split()[0]])
-                mounts.remove(line)
+        if self.disk_root is not None:
+            for line in mounts:
+                if self.disk_root.name in line:
+                    subprocess.run(["umount", line.split()[0]])
+                    mounts.remove(line)
 
         return mounts

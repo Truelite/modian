@@ -1,3 +1,4 @@
+from __future__ import annotations
 import argparse
 import logging
 import sys
@@ -6,6 +7,8 @@ import sys
 # it has been completely converted.
 import os
 import subprocess
+
+from typing import Dict
 
 from . import hardware, actions
 
@@ -81,7 +84,7 @@ class InstallCommand:
             env_config=self.env_config,
         )
 
-    def read_configuration_from_env(self):
+    def read_configuration_from_env(self) -> Dict[str, str]:
         env_config = {
             "modian_release_name": os.getenv("MODIAN_RELEASE_NAME"),
             "modian_release_full_name": os.getenv("MODIAN_RELEASE_FULL_NAME"),
