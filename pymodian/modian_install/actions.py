@@ -135,7 +135,7 @@ class Actions:
                 "--no-floppy",
                 "--efi-directory=/boot/efi",
                 "--root-directory=/mnt",
-                disk_root
+                self.system.disk_root
             ])
             # TODO: change this with the right python call
             self.hardware.run_cmd_stop_errors([
