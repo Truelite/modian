@@ -8,6 +8,7 @@ import subprocess
 from typing import Dict, Generator, List, Optional, Tuple
 
 from .actions import ModianError
+from .config import Config
 
 log = logging.getLogger()
 
@@ -17,7 +18,7 @@ class Hardware:
     Hardware detection and operations
     """
 
-    def __init__(self, env_config: Dict[str, str]):
+    def __init__(self, env_config: Config):
         self.env_config = env_config
         # In bash this was ``if efibootmgr > /dev/null 2>&1``
         self.uefi = False
@@ -201,7 +202,7 @@ class Hardware:
             recipe_fname = "{}.parted"
 
         partition_table_recipe = os.path.join(
-            self.env_config["datadir"],
+            self.env_config.datadir,
             recipe_fname.format(recipe)
         )
 

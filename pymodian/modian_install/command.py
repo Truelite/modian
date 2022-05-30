@@ -8,9 +8,8 @@ import sys
 import os
 import subprocess
 
-from typing import Dict
-
 from . import hardware, actions
+from .config import Config
 
 
 log = logging.getLogger()
@@ -84,18 +83,17 @@ class InstallCommand:
             env_config=self.env_config,
         )
 
-    def read_configuration_from_env(self) -> Dict[str, str]:
-        env_config = {
-            "modian_release_name": os.getenv("MODIAN_RELEASE_NAME"),
-            "modian_release_full_name": os.getenv("MODIAN_RELEASE_FULL_NAME"),
-            "hostname": os.getenv("HOSTNAME"),
-            "dir_bootscript": os.getenv("DIR_BOOTSCRIPT"),
-            "systemd_target": os.getenv("SYSTEMD_TARGET"),
-            "installed_boot_append": os.getenv("INSTALLED_BOOT_APPEND"),
-            "max_installed_versions": os.getenv("MAX_INSTALLED_VERSIONS"),
-            "datadir": os.getenv("DATADIR"),
-        }
-        return env_config
+    def read_configuration_from_env(self) -> Config:
+        return Config(
+            modian_release_name=os.getenv("MODIAN_RELEASE_NAME"),
+            modian_release_full_name=os.getenv("MODIAN_RELEASE_FULL_NAME"),
+            hostname=os.getenv("HOSTNAME"),
+            dir_bootscript=os.getenv("DIR_BOOTSCRIPT"),
+            systemd_target=os.getenv("SYSTEMD_TARGET"),
+            installed_boot_append=os.getenv("INSTALLED_BOOT_APPEND"),
+            max_installed_versions=os.getenv("MAX_INSTALLED_VERSIONS"),
+            datadir=os.environ["DATADIR"],
+        )
 
     def log_detection_report(self):
         """
