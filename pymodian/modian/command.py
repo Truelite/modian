@@ -1,6 +1,7 @@
 from __future__ import annotations
 import argparse
 import logging
+import socket
 import sys
 
 # Used for the non-pythonic running of actions: remove these three after
@@ -89,13 +90,14 @@ class InstallCommand:
 
     def read_configuration_from_env(self) -> Config:
         return Config(
-            modian_release_name=os.getenv("MODIAN_RELEASE_NAME"),
-            modian_release_full_name=os.getenv("MODIAN_RELEASE_FULL_NAME"),
-            hostname=os.getenv("HOSTNAME"),
-            dir_bootscript=os.getenv("DIR_BOOTSCRIPT"),
-            systemd_target=os.getenv("SYSTEMD_TARGET"),
-            installed_boot_append=os.getenv("INSTALLED_BOOT_APPEND"),
-            max_installed_versions=os.getenv("MAX_INSTALLED_VERSIONS"),
+            modian_release_name=os.environ["MODIAN_RELEASE_NAME"],
+            modian_release_full_name=os.environ["MODIAN_RELEASE_FULL_NAME"],
+            hostname=os.environ.get("HOSTNAME", socket.gethostname()),
+            dir_bootscript=os.environ.get(
+                "DIR_BOOTSCRIPT", "/etc/modian/boot.d"),
+            systemd_target=os.environ.get("SYSTEMD_TARGET", "default.target"),
+            installed_boot_append=os.environ.get("INSTALLED_BOOT_APPEND", ""),
+            max_installed_versions=os.environ["MAX_INSTALLED_VERSIONS"],
             datadir=os.environ["DATADIR"],
         )
 

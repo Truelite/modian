@@ -37,11 +37,11 @@ class Actions:
         action_method()
 
     def _stdout_lines_from_command(self, command: List[str]):
-        res = subprocess.run(command, stdout=subprocess.PIPE)
+        res = subprocess.run(command, stdout=subprocess.PIPE, check=True)
         for line in res.stdout.split(b"\n"):
             # we only provide lines with some content
             if line:
-                yield line
+                yield line.decode()
 
     def do_clean_lvm_groups(self):
         for lv in self._stdout_lines_from_command(
@@ -68,6 +68,7 @@ class Actions:
         )
         self.hardware.format_device("##root##", part_root)
         if not self.hardware.uefi:
+            cfg = self.env_config
             # Install grub and initial system disk structure,
             log.info("Installing GRUB")
             self.hardware.run_cmd_stop_errors(["mount", part_root, "/mnt"])
@@ -89,17 +90,11 @@ class Actions:
                 "modian-install-iso",
                 "--live-dir=/mnt",
                 "--no-check-integrity",
-                self.env_config["modian_release_name"],
+                self.env_config.modian_release_name,
                 "--isoimage", os.path.join("/dev", self.system.disk_inst.name),
-                "--max-installed-versions={}".format(
-                    self.env_config["max_installed_versions"]
-                ),
-                "--boot-append={}".format(
-                    self.env_config["installed_boot_append"]
-                ),
-                "--systemd-target={}".format(
-                    self.env_config["systemd_target"]
-                ),
+                f"--max-installed-versions={cfg.max_installed_versions}",
+                f"--boot-append={cfg.installed_boot_append}",
+                f"--systemd-target={self.env_config.systemd_target}",
             ])
             subprocess.run(["umount", "/mnt"])
 
@@ -116,6 +111,7 @@ class Actions:
         self.hardware.run_cmd_stop_errors(["mkfs.vfat", part_esp])
 
         if self.hardware.uefi:
+            cfg = self.env_config
             # Install grub and initial system disk structure,
             log.info("Installing GRUB")
             self.hardware.run_cmd_stop_errors(["mount", part_root, "/mnt"])
@@ -140,17 +136,11 @@ class Actions:
                 "modian-install-iso",
                 "--live-dir=/mnt",
                 "--no-check-integrity",
-                self.env_config["modian_release_name"],
+                self.env_config.modian_release_name,
                 "--isoimage", os.path.join("/dev", self.system.disk_inst.name),
-                "--max-installed-versions={}".format(
-                    self.env_config["max_installed_versions"]
-                ),
-                "--boot-append={}".format(
-                    self.env_config["installed_boot_append"]
-                ),
-                "--systemd-target={}".format(
-                    self.env_config["systemd_target"]
-                ),
+                f"--max-installed-versions={cfg.max_installed_versions}",
+                f"--boot-append={cfg.installed_boot_append}",
+                f"--systemd-target={cfg.systemd_target}",
             ])
             self.hardware.run_cmd_stop_errors(["umount", "/boot/uefi"])
             self.hardware.run_cmd_stop_errors(["umount", "/mnt"])

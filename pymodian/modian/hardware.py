@@ -33,7 +33,7 @@ class Hardware:
         with open(dev, "rt") as fd:
             return fd.read().strip()
 
-    def run_cmd_stop_errors(self, cmd, *args, **kw) \
+    def run_cmd_stop_errors(self, cmd: List[str], *args, **kw) \
             -> subprocess.CompletedProcess:
         """
         Run a command with subprocess and stop in case of errors
