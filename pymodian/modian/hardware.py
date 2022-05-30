@@ -122,14 +122,11 @@ class Hardware:
         """
         return the disk size in GiB
         """
-        fdisk_res = self.run_cmd_stop_errors(
-            ["fdisk", "-l"], capture_output=True, text=True)
-        for line in fdisk_res.stdout.splitlines():
-            if line.startswith("Disk {disk}"):
-                return int(line.split()[2].split(".")[0])
-
-        raise ModianError(f"Failed to detect disk size for {disk}"
-                          "(it does not appear in ``fdisk -l`` output)")
+        res = self.run_cmd_stop_errors(
+            ["lsblk", "--noheadings", "--nodeps", "--bytes",
+             "--output", "SIZE", disk],
+            capture_output=True, text=True)
+        return int(res.stdout) / (1_000_000_000)
 
     def get_disk_model(self, disk: str) -> str:
         """
