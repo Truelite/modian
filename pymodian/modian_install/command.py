@@ -67,7 +67,7 @@ class InstallCommand:
 
         self.env_config = self.read_configuration_from_env()
 
-        self.hardware = self.HARDWARE_CLASS(env_config = self.env_config)
+        self.hardware = self.HARDWARE_CLASS(env_config=self.env_config)
 
         if system_class is None:
             system_class = self.SYSTEM_CLASS
@@ -151,11 +151,14 @@ class InstallCommand:
         env["DISK_ROOT"] = self.system.disk_root.name
         env["DISK_INST"] = self.system.disk_inst.name
         if self.system.LABELS["root"] in self.system.partitions:
-            env["PART_ROOT"] = self.system.partitions[self.system.LABELS["root"]].dev
+            env["PART_ROOT"] = self.system.partitions[
+                self.system.LABELS["root"]].dev
         if self.system.LABELS["log"] in self.system.partitions:
-            env["PART_LOG"] = self.system.partitions[self.system.LABELS["log"]].dev
+            env["PART_LOG"] = self.system.partitions[
+                self.system.LABELS["log"]].dev
         if self.system.LABELS["esp"] in self.system.partitions:
-            env["PART_ESP"] = self.system.partitions[self.system.LABELS["esp"]].dev
+            env["PART_ESP"] = self.system.partitions[
+                self.system.LABELS["esp"]].dev
         env["ACTIONS"] = "{}".format(" ".join(self.action_list))
 
         env.update(self.add_additional_environment())
