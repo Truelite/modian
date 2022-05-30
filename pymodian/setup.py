@@ -11,5 +11,5 @@ setup(
     include_package_data=True,
     install_requires=[],
     # license="http://www.gnu.org/licenses/agpl-3.0.html",
-    packages=["modian_install"]
+    packages=["modian"]
 )

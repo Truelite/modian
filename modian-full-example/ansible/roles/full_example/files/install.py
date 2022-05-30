@@ -4,14 +4,14 @@ import logging
 import os
 import sys
 
-import modian_install
+import modian
 
 log = logging.getLogger()
 
 VERSION = "1.0"
 
 
-class System(modian_install.hardware.System):
+class System(modian.hardware.System):
     def __init__(self, hardware):
         super().__init__(hardware)
         self.disk_img = None
@@ -65,7 +65,7 @@ class System(modian_install.hardware.System):
         return ["format_part_data"]
 
 
-class Actions(modian_install.actions.Actions):
+class Actions(modian.actions.Actions):
     def do_format_part_data(self, part_data=None):
         part_data = part_data or os.path.join(
             "/dev",
@@ -109,7 +109,7 @@ class Actions(modian_install.actions.Actions):
         )
 
 
-class Command(modian_install.command.InstallCommand):
+class Command(modian.command.InstallCommand):
     SYSTEM_CLASS = System
     ACTIONS_CLASS = Actions
 
@@ -150,6 +150,6 @@ class Command(modian_install.command.InstallCommand):
 if __name__ == "__main__":
     try:
         Command().main()
-    except modian_install.actions.ModianError as e:
+    except modian.actions.ModianError as e:
         log.error("%s", e)
         sys.exit(1)

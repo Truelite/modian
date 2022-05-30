@@ -3,7 +3,7 @@
 import logging
 import sys
 
-import modian_install
+import modian
 
 
 log = logging.getLogger()
@@ -11,7 +11,7 @@ log = logging.getLogger()
 
 if __name__ == "__main__":
     try:
-        modian_install.command.InstallCommand().main()
-    except modian_install.actions.ModianError as e:
+        modian.command.InstallCommand().main()
+    except modian.actions.ModianError as e:
         log.error("%s", e)
         sys.exit(1)
