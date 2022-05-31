@@ -14,4 +14,5 @@ echo "running qemu"
 qemu-system-x86_64 \
     -m 1G \
     -serial stdio \
+    -vga cirrus \
     -hda live_test.qcow2

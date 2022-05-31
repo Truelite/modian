@@ -1,6 +1,7 @@
 ==============================
- modian-full-bullseye-example
+ modian-full-example-bullseye
 ==============================
 
 This is an example project that uses ``modian-live-wrapper`` and the
-rest of modian to generate a customized image based on Debian bullseye.
+rest of modian to generate a customized image for the bullseye
+distribution.
