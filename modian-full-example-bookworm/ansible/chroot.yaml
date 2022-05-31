@@ -1,0 +1,27 @@
+---
+- hosts: all
+  roles:
+    # live and modian roles from the common modian-live-wrapper roles
+    - live
+    - modian
+    # our custom role, defined here
+    - full_example
+    # live role from the common modian-live-wrapper roles
+    - live
+    - modian-system-modes
+  tasks:
+    - name: set the modian release name
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MODIAN_RELEASE_NAME="0.1"'
+        regexp: 'MODIAN_RELEASE_NAME="'
+    - name: set the modian release full name
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MODIAN_RELEASE_FULL_NAME="0.1.0"'
+        regexp: 'MODIAN_RELEASE_FULL_NAME="'
+    - name: raise the number of versions kept
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MAX_INSTALLED_VERSIONS=4'
+        regexp: 'MAX_INSTALLED_VERSIONS="'
