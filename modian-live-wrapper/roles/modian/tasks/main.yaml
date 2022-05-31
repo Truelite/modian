@@ -5,5 +5,5 @@
     state: present
 - name: Install modian packages
   apt:
-    name: modian-install
+    name: modian-install,python3-modian
     state: present
