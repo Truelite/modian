@@ -8,7 +8,14 @@
 # stop on error
 set -e
 
-ISO=${1:-"dest/modian-full-example.iso"}
+ISO=${1:-"$(ls dest/modian*iso | head -n 1)"}
+
+if [ -z $ISO ] || [ ! -e $ISO ] ; then
+    echo "No such file: $ISO"
+    exit 1
+fi
+
+exit 0
 
 if [ ! -e live_test.qcow2 ] ; then
     qemu-img create -f qcow2 live_test.qcow2 40G
