@@ -1,0 +1,10 @@
+---
+  - name: install virtualization packages
+    apt:
+      name: qemu-system-x86,qemu-utils
+      state: present
+
+  - name: install X and a dm to show the virtualized image
+    apt:
+      name: xorg
+      state: present

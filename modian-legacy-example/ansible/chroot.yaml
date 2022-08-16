@@ -4,6 +4,7 @@
     # live and modian roles from the common modian-live-wrapper roles
     - live
     - modian
+    - legacy
   tasks:
     - name: set the modian release name
       lineinfile:
