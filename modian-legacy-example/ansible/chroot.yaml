@@ -16,3 +16,8 @@
         path: /etc/modian/config.sh
         line: 'export MODIAN_RELEASE_FULL_NAME="0.1.0"'
         regexp: 'MODIAN_RELEASE_FULL_NAME="'
+    - name: set the number of versions kept
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MAX_INSTALLED_VERSIONS=1'
+        regexp: 'MAX_INSTALLED_VERSIONS="'
