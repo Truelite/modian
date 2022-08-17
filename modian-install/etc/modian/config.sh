@@ -25,3 +25,4 @@ export HOSTNAME=$(hostname)
 export DIR_BOOTSCRIPT=/etc/modian/boot.d
 export SYSTEMD_TARGET=default.target
 export INSTALLED_BOOT_APPEND=""
+export MAX_INSTALLED_VERSIONS=3
