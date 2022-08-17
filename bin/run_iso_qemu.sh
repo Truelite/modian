@@ -15,8 +15,6 @@ if [ -z $ISO ] || [ ! -e $ISO ] ; then
     exit 1
 fi
 
-exit 0
-
 if [ ! -e live_test.qcow2 ] ; then
     qemu-img create -f qcow2 live_test.qcow2 40G
 fi
