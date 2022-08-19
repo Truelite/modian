@@ -1,2 +1,3 @@
 # Get modian packages from a repository served by ``./local_repo.py serve``
 modian_repo: '[trusted=yes] http://localhost:8099/'
+legacy_guest_iso: "../guest.iso"

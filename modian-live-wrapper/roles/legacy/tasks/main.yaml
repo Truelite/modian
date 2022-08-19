@@ -8,3 +8,17 @@
     apt:
       name: xorg
       state: present
+
+  - name: prepare the directory for images
+    file:
+      path: /srv/iso
+      state: directory
+
+  - name: get the iso basename
+    set_fact:
+      iso_filename: "{{ legacy_guest_iso | basename }}"
+
+  - name: copy the iso inside the image
+    copy:
+      src: "{{ legacy_guest_iso }}"
+      dest: "/srv/iso/{{ iso_filename }}"

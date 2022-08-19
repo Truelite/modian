@@ -1,2 +1,3 @@
 # fill this when there will be a public repository with modian packages
 modian_repo: '[trusted=yes] http://localhost:8099/'
+legacy_guest_iso: "../guest.iso"
