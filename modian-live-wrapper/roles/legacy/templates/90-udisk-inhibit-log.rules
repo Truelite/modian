@@ -1,0 +1,1 @@
+SUBSYSTEM=="block", ENV{{ '{{' }}ID_FS_LABEL}}=="##log##", ENV{{ '{{' }}UDISKS_IGNORE}}="1"
