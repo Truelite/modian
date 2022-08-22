@@ -8,7 +8,7 @@
 # [sudo] MODIAN_LWR=path/to/modian/modian-live-wrapper/lwr.py ./build_example
 
 MLW_DEST=${MLW_DEST:-dest}
-MLW_ISO=${MLW_ISO:-modian-full-example.iso}
+MLW_ISO=${MLW_ISO:-modian-legacy-example.iso}
 MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
 MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-modian-legacy-example}
 MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Legacy Runner"}
