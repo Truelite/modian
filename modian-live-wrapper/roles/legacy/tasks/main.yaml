@@ -6,7 +6,7 @@
 
   - name: install X and a dm to show the virtualized image
     apt:
-      name: xorg
+      name: "{{ legacy_host_dm }}"
       state: present
 
   - name: prepare the directory for images
