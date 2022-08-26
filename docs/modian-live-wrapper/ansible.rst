@@ -26,18 +26,23 @@ that you can use in your templates:
    name of the kernel image package for the current architecture (see
    :doc:`custom-kernels`)
 
-modian-live-wrapper provides a ``live`` role in
-``roles/live/tasks/main.yaml`` that sets up a live system: you can add
-it to the roles in your custom playbook by using a relative path, e.g.::
+modian-live-wrapper provides some :doc:`roles` to customize the live
+system, most importantly ``live`` which sets up a live system, and
+``modian``, which installs the modian packages: you can add them to the
+roles in your custom playbook by using e.g.::
 
    roles:
+     - live
+     - modian
      - example
-     - ../modian-live-wrapper/roles/live
 
-other roles, like ``example`` above are searched in the directory
-``roles`` where the playbook lives.
+The search path for roles includes, in the following order:
 
-Here are some example rules you can use in a custom playbook::
+* the directory ``roles`` where the playbook lives;
+* ``/usr/share/modian-live-wrapper/roles``;
+* the directory ``roles`` wherever modian-live-wrapper is run from.
+
+Here are some example tasks you can use in a custom playbook::
 
     - name: set live system hostname
       hostname:
