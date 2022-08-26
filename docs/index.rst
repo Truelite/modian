@@ -11,7 +11,7 @@ Welcome to Modian's documentation!
    :caption: Contents:
 
    system_description
-   modian-full-example/index
+   modian-examples/index
    modian-live-wrapper/index
    modian-install/index
 
