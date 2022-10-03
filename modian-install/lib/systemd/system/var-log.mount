@@ -1,6 +1,7 @@
 [Unit]
 Description=Log directory
 Conflicts=modian-install.target
+ConditionPathExists=!/etc/modian/legacy.conf
 
 [Mount]
 What=/dev/disk/by-label/##log##
