@@ -1,0 +1,96 @@
+#!/usr/bin/python3
+
+import argparse
+import configparser
+import os
+import shutil
+import subprocess
+import sys
+
+DEFAULT_CONFFILE = "/etc/modian/legacy.conf"
+DEFAULT_ISO = "/srv/iso/guest.iso"
+DEFAULT_KERNEL = "$ISO.kernel"
+DEFAULT_INITRD = "$ISO.initrd"
+DEFAULT_CMDLINE = "boot=live config username=root hostname=controller persistent consoleblank=0 --"
+
+
+class Fail(Exception):
+    pass
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run modian legacy guest image")
+    parser.add_argument("--config", metavar="file.conf", action="store", default=DEFAULT_CONFFILE,
+                        help="Modian Legacy configuration file")
+    parser.add_argument("--iso", metavar="file.iso", action="store",
+                        help=f"ISO image to start. Default: {DEFAULT_ISO}")
+    parser.add_argument("--kernel", metavar="vmlinuz", action="store",
+                        help=f"kernel image to boot. Default: {DEFAULT_KERNEL}")
+    parser.add_argument("--initrd", metavar="initrd.img", action="store",
+                        help=f"initrd image to boot. Default: {DEFAULT_INITRD}")
+    parser.add_argument("--cmdline", action="store",
+                        help=f"Kernel command line. Default: {DEFAULT_CMDLINE!r}")
+    args = parser.parse_args()
+
+    config = configparser.ConfigParser(default_section="legacy")
+
+    # Defaults
+    config.read_dict({"legacy": {
+        "iso": DEFAULT_ISO,
+        "kernel": DEFAULT_KERNEL,
+        "initrd": DEFAULT_INITRD,
+        "cmdline": DEFAULT_CMDLINE,
+    }})
+
+    # Read values from config file
+    config.read([args.config])
+
+    # Read values from commandline
+    if args.iso:
+        config.set("legacy", "iso", args.iso)
+    if args.kernel:
+        config.set("legacy", "kernel", args.kernel)
+    if args.initrd:
+        config.set("legacy", "initrd", args.initrd)
+    if args.cmdline:
+        config.set("legacy", "cmdline", args.cmdline)
+
+    kvm = shutil.which("kvm")
+
+    iso = config.get("legacy", "iso")
+    if not os.path.exists(iso):
+        raise Fail(f"{iso} not found")
+
+    kernel = config.get("legacy", "kernel").replace("$ISO", iso)
+    initrd = config.get("legacy", "initrd").replace("$ISO", iso)
+
+    # Extract kernel and initrd from ISO files if needed
+    if not os.path.exists(kernel):
+        res = subprocess.run(["bsdtar", "xqOf", iso, "live/vmlinuz"], stdout=subprocess.PIPE, check=True)
+        with open(kernel, "wb") as fd:
+            fd.write(res.stdout)
+    if not os.path.exists(initrd):
+        res = subprocess.run(["bsdtar", "xqOf", iso, "live/initrd.img"], stdout=subprocess.PIPE, check=True)
+        with open(initrd, "wb") as fd:
+            fd.write(res.stdout)
+
+    cmd = [
+        kvm,
+        "-kernel", kernel,
+        "-initrd", initrd,
+        "-cdrom", iso,
+        "-append", config.get("legacy", "cmdline"),
+        "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
+        "-nic", "bridge,id=eth0,br=br0,model=e1000,mac=52:54:00:00:00:01",
+        "-nic", "tap,id=eth1,model=e1000,mac=52:54:00:00:00:02",
+    ]
+
+    os.execvp(kvm, cmd)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Fail as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)

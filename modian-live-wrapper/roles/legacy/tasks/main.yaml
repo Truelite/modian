@@ -23,8 +23,10 @@
       src: "{{ legacy_guest_iso }}"
       dest: "/srv/iso/{{ iso_filename }}"
 
-  - name: disable mounting log partition
-    template:
-      src: 90-udisk-inhibit-log.rules
-      dest: /etc/udev/rules.d/90-udisk-inhibit-log.rules
-    notify: reload udev
+  - name: copy the quest startup script
+    copy:
+      src: modian-legacy
+      dest: /usr/bin/modian-legacy
+      mode: 0755
+      owner: root
+      group: root
