@@ -4,7 +4,7 @@ PartOf=graphical-session.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/modian-legacy
+ExecStart=/usr/bin/sudo /usr/bin/modian-legacy
 RestartSec=3s
 Restart=always
 

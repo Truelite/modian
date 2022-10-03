@@ -64,6 +64,9 @@
       group: root
 
   - name: Add Xsession hook
-    template:
+    copy:
       src: xsession-hook
       dest: /etc/X11/Xsession.d/99modian-legacy
+      mode: 0755
+      owner: root
+      group: root
