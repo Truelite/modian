@@ -30,3 +30,40 @@
       mode: 0755
       owner: root
       group: root
+
+  - name: "Create user unit modian-legacy.target" 
+    copy:
+      src: modian-legacy.target
+      dest: "/lib/systemd/user/modian-legacy.target"
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: "Create user unit modian-legacy.service" 
+    copy:
+      src: modian-legacy.service
+      dest: "/lib/systemd/user/modian-legacy.service"
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: Make sure /etc/X11 exists
+    file:
+      path: /etc/X11
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: Make sure /etc/X11/Xsession.d exists
+    file:
+      path: /etc/X11/Xsession.d
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: Add Xsession hook
+    template:
+      src: xsession-hook
+      dest: /etc/X11/Xsession.d/99modian-legacy
