@@ -132,7 +132,7 @@ To test the image using BIOS boot::
 For EFI boot you will need to install the ``ovmf`` package and then
 run::
 
-   qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -m 2G -cdrom live.iso 
+   qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -m 2G -cdrom live.iso
 
 To test with an emulated USB device, run::
 
