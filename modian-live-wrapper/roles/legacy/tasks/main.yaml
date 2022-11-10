@@ -1,4 +1,9 @@
 ---
+  - name: legacy system configuration file
+    copy:
+      src: "{{ legacy_conf }}"
+      dest: /etc/modian/legacy.conf
+
   - name: install virtualization packages
     apt:
       name: qemu-system-x86,qemu-utils

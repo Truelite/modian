@@ -1,2 +1,3 @@
 ---
 legacy_host_dm: "xorg,lxde"
+legacy_conf: "default_legacy.conf"
