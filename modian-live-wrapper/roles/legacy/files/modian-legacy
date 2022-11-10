@@ -85,6 +85,8 @@ def main():
         "-nic", "tap,id=eth1,model=e1000,mac=52:54:00:00:00:02",
     ]
 
+    print("Running command:"," ".join(cmd))
+
     os.execvp(kvm, cmd)
 
 
