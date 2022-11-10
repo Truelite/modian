@@ -52,6 +52,12 @@
       owner: root
       group: root
 
+  - name: "Enable user unit modian-legacy.service"
+    systemd:
+      name: modian-legacy
+      enabled: yes
+      scope: user
+
   - name: Make sure /etc/X11 exists
     file:
       path: /etc/X11
