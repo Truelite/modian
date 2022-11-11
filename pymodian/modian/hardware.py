@@ -168,6 +168,39 @@ class Hardware:
         else:
             raise ModianError(f"Unsupported disk type {disk}")
 
+    def get_partition_recipe_fname(self, device: str, recipe: str) -> str:
+        """
+        Get the filename of an appropriate parted recipe.
+
+        This can be overridden to add custom checks on the size or any
+        other known property of the device.
+
+        Return a string with the full path of the recipe.
+        """
+        disksizeGiB = self.get_GiB_disk_size(device)
+
+        # TODO: The current -32G parted file looks like it's supposed to
+        # partition disks larger than 32GiB. However, this check maintains
+        # compatibility with the previous shell code: it could be that one of
+        # the paths was not tested, and that, after investigation, this check
+        # might not be needed anymore
+        if disksizeGiB < 32:
+            recipe_fname = "{}-32G.parted"
+        else:
+            recipe_fname = "{}.parted"
+
+        recipe_fname = recipe_fname.format(recipe)
+
+        if not recipe_fname.endswith(".parted"):
+            recipe_fname = recipe_fname + ".parted"
+
+        partition_table_recipe = os.path.join(
+            "/etc/modian/partitions/"
+            recipe_fname.format(recipe)
+        )
+
+        return partition_table_recipe
+
     def partition_disk(self, device: str, recipe: str):
         """
         Partition the disk using the parted script with the given name.
@@ -184,21 +217,8 @@ class Hardware:
             "count=1",
             "status=none",
         ])
-        disksizeGiB = self.get_GiB_disk_size(device)
-
-        # TODO: The current -32G parted file looks like it's supposed to
-        # partition disks larger than 32GiB. However, this check maintains
-        # compatibility with the previous shell code: it could be that one of
-        # the paths was not tested, and that, after investigation, this check
-        # might not be needed anymore
-        if disksizeGiB < 32:
-            recipe_fname = "{}-32G.parted"
-        else:
-            recipe_fname = "{}.parted"
-
-        partition_table_recipe = os.path.join(
-            self.env_config.datadir,
-            recipe_fname.format(recipe)
+        partition_table_recipe = self.get_partition_recipe_fname(
+            device, recipe
         )
 
         log.info("Partitioning disk %s", device)
