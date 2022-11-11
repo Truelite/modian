@@ -5,6 +5,13 @@
 # stop on error
 set -e
 
+# adding parameter
+if [ "$#" != "" ]; then
+    QEMU_MEM=$1
+else
+    QEMU_MEM=1G
+fi
+
 # To add custom kernel parameters we should pass a kernel to qemu and add
 # -append "boot=live ip=frommedia persistence-path=/live-0.1/ persistence
 # live-media-path=live-0.1 consoleblank=0 console=ttyS0 printk.devkmsg=on" to
@@ -12,7 +19,7 @@ set -e
 # simply add the following options manually: console=ttyS0 printk.devkmsg=on
 echo "running qemu"
 qemu-system-x86_64 \
-    -m 1G \
+    -m $QEMU_MEM \
     -serial stdio \
     -vga cirrus \
     -hda live_test.qcow2

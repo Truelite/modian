@@ -25,10 +25,17 @@ else
     echo "bsdtar is not available; under debian it is in the package libarchive-tools"
 fi
 
+# adding parameter
+if [ "$#" != "" ]; then
+    QEMU_MEM=$1
+else
+    QEMU_MEM=2G
+fi
+
 # we run the iso as if it was an usb device, as cdroms are still not supported
 # by modian-install
 qemu-system-x86_64 \
-    -m 1G \
+    -m $QEMU_MEM \
     -hdc "$ISO" \
     -hda live_test.qcow2 \
     -serial stdio \
