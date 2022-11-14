@@ -14,6 +14,17 @@
       name: "{{ legacy_host_dm }}"
       state: present
 
+  - name: qemu configuration directory
+    file:
+      path: /etc/qemu
+      state: directory
+
+  - name: qemu bridge whitelist
+    template:
+      src: bridge.conf
+      dest: /etc/qemu/bridge.conf
+      mode: 0640
+
   - name: prepare the directory for images
     file:
       path: /srv/iso
