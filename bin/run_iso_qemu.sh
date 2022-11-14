@@ -25,12 +25,8 @@ else
     echo "bsdtar is not available; under debian it is in the package libarchive-tools"
 fi
 
-# adding parameter
-if [ "$#" != "" ]; then
-    QEMU_MEM=$1
-else
-    QEMU_MEM=2G
-fi
+# memory allocated to qemu
+QEMU_MEM=${QEMU_MEM:-"2G"}
 
 # we run the iso as if it was an usb device, as cdroms are still not supported
 # by modian-install

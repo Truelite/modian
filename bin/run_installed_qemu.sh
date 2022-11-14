@@ -5,12 +5,8 @@
 # stop on error
 set -e
 
-# adding parameter
-if [ "$#" != "" ]; then
-    QEMU_MEM=$1
-else
-    QEMU_MEM=1G
-fi
+# memory allocated to qemu
+QEMU_MEM=${QEMU_MEM:-"2G"}
 
 # To add custom kernel parameters we should pass a kernel to qemu and add
 # -append "boot=live ip=frommedia persistence-path=/live-0.1/ persistence
