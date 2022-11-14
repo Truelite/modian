@@ -17,7 +17,7 @@ MLW_RELEASE=${MLW_RELEASE:-bullseye}
 
 MODIAN_LWR=${MODIAN_LWR:-modian-lwr}
 
-FILELOG=${MLW_DEST}/modian-full-example-$(date "+%Y%m%d_%H%M%S").log
+FILELOG=${MLW_DEST}/modian-legacy-example-$(date "+%Y%m%d_%H%M%S").log
 
 mkdir -p ${MLW_DEST}
 mkdir -p build/chroot
