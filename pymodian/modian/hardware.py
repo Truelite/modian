@@ -195,7 +195,7 @@ class Hardware:
             recipe_fname = recipe_fname + ".parted"
 
         partition_table_recipe = os.path.join(
-            "/etc/modian/partitions/"
+            "/etc/modian/partitions/",
             recipe_fname.format(recipe)
         )
 
