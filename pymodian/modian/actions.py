@@ -126,7 +126,7 @@ class Actions:
                 "--no-floppy",
                 "--efi-directory=/boot/efi",
                 "--root-directory=/mnt",
-                self.system.disk_root
+                self.system.disk_root.device
             ])
             # TODO: change this with the right python call
             self.hardware.run_cmd_stop_errors([
@@ -144,7 +144,7 @@ class Actions:
                 f"--boot-append={cfg.installed_boot_append}",
                 f"--systemd-target={cfg.systemd_target}",
             ])
-            self.hardware.run_cmd_stop_errors(["umount", "/boot/uefi"])
+            self.hardware.run_cmd_stop_errors(["umount", "/boot/efi"])
             self.hardware.run_cmd_stop_errors(["umount", "/mnt"])
 
     def do_format_part_log(self, part_log=None):

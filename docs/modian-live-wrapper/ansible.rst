@@ -62,15 +62,14 @@ Note that the repository key will not be automatically removed. Please
 file an issue (possibly a merge request) if you need it to happen. ::
 
     - name: add internal repository key
-      apt_key:
-        id: 123456789ABCDEF0123456789ABCDEF012345678
-        state: present
-        data: |
-            -----BEGIN PGP PUBLIC KEY BLOCK-----
-            …
-            -----END PGP PUBLIC KEY BLOCK-----
+      copy:
+        src: <filename>-keyring.gpg
+        dest: /usr/share/keyrings/internal-keyring.gpg
     - name: enable internal repository
       apt_repository:
-        repo: deb http://example.local/debian stretch main
+        repo: deb [signed-by=/usr/share/keyrings/<filename>-keyring.gpg] http://example.local/debian bookworm main
         filename: our-internal-repository
         state: present
+
+where ``internal.keyring.gpg`` is the *dearmoured* key you want to use
+and is available to ansible in an appropriate ``files`` directory.
