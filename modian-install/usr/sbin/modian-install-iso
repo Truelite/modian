@@ -95,7 +95,7 @@ class Installer:
             )
 
     def get_Gib_partionTableForIsoLive(self):
-        fp = open("/usr/share/modian-install/systemdisk-bios-32G.parted", "r")
+        fp = open("/etc/modian/partitions/systemdisk-bios-32G.parted", "r")
         fp.readline()  # first line doesn't care
         line = fp.readline()
         lineArgs = line.strip().split()
