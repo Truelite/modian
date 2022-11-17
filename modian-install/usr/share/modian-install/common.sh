@@ -82,22 +82,6 @@ do_first_install()
         fi
     done
 
-    # Umount all partitions from the target drives
-    if [ -n "$DISK_IMG" ]
-    then
-        for dev in $(grep ^/dev/$DISK_IMG /proc/mounts | sed -re 's/[[:space:]].+//')
-        do
-            progress "Umounting $dev (on the img disk)"
-            umount $dev
-        done
-    fi
-    for dev in $(grep ^/dev/$DISK_ROOT /proc/mounts | sed -re 's/[[:space:]].+//')
-    do
-        progress "Umounting $dev (on the root disk)"
-        umount $dev
-    done
-    echo ""
-
     progress "Restore data partition"
     if [ -d ${BACKUPDIR}/System ]; then
         if mount /dev/${PART_DATA} ${TMPDIR} &>/dev/null; then
