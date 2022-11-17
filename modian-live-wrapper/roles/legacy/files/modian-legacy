@@ -79,10 +79,14 @@ def main():
         "-kernel", kernel,
         "-initrd", initrd,
         "-cdrom", iso,
+	"-m", "12G",
+	"-smp", "12",
         "-append", config.get("legacy", "cmdline"),
         "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
-        "-nic", "bridge,id=eth0,br=br0,model=e1000,mac=52:54:00:00:00:01",
-        "-nic", "tap,id=eth1,model=e1000,mac=52:54:00:00:00:02",
+        "-nic", "tap,id=eth0,model=e1000,mac=52:54:00:00:00:11",
+        "-nic", "bridge,id=eth1,br=br0,model=e1000,mac=52:54:00:00:00:01",
+        "-nic", "tap,id=eth2,model=e1000,mac=52:54:00:00:00:11",
+        "-nic", "bridge,id=eth3,br=br1,model=e1000,mac=52:54:00:00:00:02",
     ]
 
     print("Running command:"," ".join(cmd))
