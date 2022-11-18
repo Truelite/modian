@@ -61,41 +61,6 @@ fail()
 # Read the config.sh (this should really happen in the python command, however)
 . /etc/modian/config.sh
 
-do_first_install()
-{
-    return
-
-    # this is ignored, even if it still has to be migrated
-
-    progress "Data partition detection"
-    TMPDIR=$(mktemp -d)
-    BACKUPDIR=$(mktemp -d)
-    for DDISK in $(ls /dev/disk/by-uuid); do
-        if mount /dev/disk/by-uuid/${DDISK} ${TMPDIR} &>/dev/null; then
-            if [ -d ${TMPDIR}/System ]; then
-                cp -a ${TMPDIR}/System ${BACKUPDIR}
-                umount ${TMPDIR}
-		verbose "System found in ${DDISK}"
-	        break
-            fi
-            umount ${TMPDIR}
-        fi
-    done
-
-    progress "Restore data partition"
-    if [ -d ${BACKUPDIR}/System ]; then
-        if mount /dev/${PART_DATA} ${TMPDIR} &>/dev/null; then
-            cp -a ${BACKUPDIR}/System ${TMPDIR}
-            umount ${TMPDIR}
-            verbose "System restored in ${PART_DATA}"
-        else
-            verbose "mount ${PART_DATA} failure"
-        fi
-    else
-        verbose "System dir is not found"
-    fi
-}
-
 # Print a string centered on the terminal
 display_center()
 {
