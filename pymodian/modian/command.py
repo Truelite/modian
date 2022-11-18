@@ -156,8 +156,6 @@ class InstallCommand:
         return {}
 
     def run_actions(self):
-        # TODO: as a first step, write a script that loads common.sh and
-        # runs all actions and run it with subprocess
         env = os.environ.copy()
         env["DISK_ROOT"] = self.system.disk_root.name
         env["DISK_INST"] = self.system.disk_inst.name
@@ -175,13 +173,7 @@ class InstallCommand:
         env.update(self.add_additional_environment())
 
         for action in self.action_list:
-            try:
-                self.actions.run_action(action)
-            except exceptions.ActionNotImplementedError:
-                subprocess.run([
-                    '/usr/sbin/modian-run-action',
-                    action
-                ], env=env, check=True)
+            self.actions.run_action(action)
 
     def main(self):
         self.setup()
