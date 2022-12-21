@@ -30,6 +30,14 @@ def main():
                         help=f"initrd image to boot. Default: {DEFAULT_INITRD}")
     parser.add_argument("--cmdline", action="store",
                         help=f"Kernel command line. Default: {DEFAULT_CMDLINE!r}")
+    parser.add_argument("--hda", metavar="hda", action="store",
+                        help="path to the first disk")
+    parser.add_argument("--hdb", metavar="hdb", action="store",
+                        help="path to the second disk")
+    parser.add_argument("--hdc", metavar="hdc", action="store",
+                        help="path to the third disk")
+    parser.add_argument("--hdd", metavar="hdd", action="store",
+                        help="path to the fourth disk")
     args = parser.parse_args()
 
     config = configparser.ConfigParser(default_section="legacy")
@@ -40,6 +48,10 @@ def main():
         "kernel": DEFAULT_KERNEL,
         "initrd": DEFAULT_INITRD,
         "cmdline": DEFAULT_CMDLINE,
+        "hda": None,
+        "hdb": None,
+        "hdc": None,
+        "hdd": None,
     }})
 
     # Read values from config file
@@ -88,6 +100,12 @@ def main():
         "-nic", "tap,id=eth2,model=e1000,mac=52:54:00:00:00:11",
         "-nic", "bridge,id=eth3,br=br1,model=e1000,mac=52:54:00:00:00:02",
     ]
+    for letter in "abcd":
+        d_name = "hd"+letter
+        d_path = config.get("legacy", dname)
+        if d_path:
+            cmd.append("-"+d_name)
+            cmd.append(d_path)
 
     print("Running command:"," ".join(cmd))
 

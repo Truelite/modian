@@ -39,7 +39,7 @@
       src: "{{ legacy_guest_iso }}"
       dest: "/srv/iso/{{ iso_filename }}"
 
-  - name: copy the quest startup script
+  - name: copy the qemu startup script
     copy:
       src: modian-legacy
       dest: /usr/bin/modian-legacy
