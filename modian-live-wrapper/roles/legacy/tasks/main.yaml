@@ -2,7 +2,7 @@
   - name: legacy system configuration file
     copy:
       src: "{{ legacy_conf }}"
-      dest: /etc/modian/legacy.conf
+      dest: /etc/modian/legacy.yaml
 
   - name: install virtualization packages
     apt:
@@ -12,6 +12,11 @@
   - name: install X and a dm to show the virtualized image
     apt:
       name: "{{ legacy_host_dm }}"
+      state: present
+
+  - name: install dependencies of the modian-legacy script
+    apt:
+      name: python3-ruamel.yaml
       state: present
 
   - name: qemu configuration directory

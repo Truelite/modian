@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 
 import argparse
-import configparser
 import os
 import shutil
 import subprocess
 import sys
 
-DEFAULT_CONFFILE = "/etc/modian/legacy.conf"
+import ruamel.yaml
+
+DEFAULT_CONFFILE = "/etc/modian/legacy.yaml"
 DEFAULT_ISO = "/srv/iso/guest.iso"
 DEFAULT_KERNEL = "$ISO.kernel"
 DEFAULT_INITRD = "$ISO.initrd"
@@ -16,6 +17,42 @@ DEFAULT_CMDLINE = "boot=live config username=root hostname=controller persistent
 
 class Fail(Exception):
     pass
+
+
+class Config:
+    def __init__(self, c_file=DEFAULT_CONFFILE):
+        self.c_file = c_file
+        self.data = self.defaults()
+
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
+    def defaults(self):
+        return {
+            "iso": DEFAULT_ISO,
+            "kernel": DEFAULT_KERNEL,
+            "initrd": DEFAULT_INITRD,
+            "cmdline": DEFAULT_CMDLINE,
+            "hda": None,
+            "hdb": None,
+            "hdc": None,
+            "hdd": None,
+        }
+
+    def read_file(self, c_file=None):
+        yaml = ruamel.yaml.YAML(typ="safe")
+        with open(c_file or self.c_file) as fp:
+            data = yaml.load(fp)
+        for key in self.data:
+            value = data.get(key, None)
+            if value:
+                self.data[key] = value
+
+    def read_args(self, args):
+        for key in self.data:
+            value = getattr(args, key, None)
+            if value:
+                self.data[key] = value
 
 
 def main():
@@ -40,41 +77,18 @@ def main():
                         help="path to the fourth disk")
     args = parser.parse_args()
 
-    config = configparser.ConfigParser(default_section="legacy")
-
-    # Defaults
-    config.read_dict({"legacy": {
-        "iso": DEFAULT_ISO,
-        "kernel": DEFAULT_KERNEL,
-        "initrd": DEFAULT_INITRD,
-        "cmdline": DEFAULT_CMDLINE,
-        "hda": None,
-        "hdb": None,
-        "hdc": None,
-        "hdd": None,
-    }})
-
-    # Read values from config file
-    config.read([args.config])
-
-    # Read values from commandline
-    if args.iso:
-        config.set("legacy", "iso", args.iso)
-    if args.kernel:
-        config.set("legacy", "kernel", args.kernel)
-    if args.initrd:
-        config.set("legacy", "initrd", args.initrd)
-    if args.cmdline:
-        config.set("legacy", "cmdline", args.cmdline)
+    config = Config(args.config)
+    config.read_file()
+    config.read_args(args)
 
     kvm = shutil.which("kvm")
 
-    iso = config.get("legacy", "iso")
+    iso = config.get("iso")
     if not os.path.exists(iso):
         raise Fail(f"{iso} not found")
 
-    kernel = config.get("legacy", "kernel").replace("$ISO", iso)
-    initrd = config.get("legacy", "initrd").replace("$ISO", iso)
+    kernel = config.get("kernel").replace("$ISO", iso)
+    initrd = config.get("initrd").replace("$ISO", iso)
 
     # Extract kernel and initrd from ISO files if needed
     if not os.path.exists(kernel):
@@ -91,9 +105,9 @@ def main():
         "-kernel", kernel,
         "-initrd", initrd,
         "-cdrom", iso,
-	"-m", "12G",
-	"-smp", "12",
-        "-append", config.get("legacy", "cmdline"),
+        "-m", "12G",
+        "-smp", "12",
+        "-append", config.get("cmdline"),
         "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
         "-nic", "tap,id=eth0,model=e1000,mac=52:54:00:00:00:11",
         "-nic", "bridge,id=eth1,br=br0,model=e1000,mac=52:54:00:00:00:01",
@@ -102,12 +116,12 @@ def main():
     ]
     for letter in "abcd":
         d_name = "hd"+letter
-        d_path = config.get("legacy", dname)
+        d_path = config.get(d_name)
         if d_path:
             cmd.append("-"+d_name)
             cmd.append(d_path)
 
-    print("Running command:"," ".join(cmd))
+    print("Running command:", " ".join(cmd))
 
     os.execvp(kvm, cmd)
 
