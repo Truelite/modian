@@ -238,7 +238,11 @@ class Hardware:
         self.run_cmd_stop_errors(["partx", "-u", device])
         self.run_cmd_stop_errors(["partx", "-s", device])
 
-    def format_device(self, label: str, device: str):
+    def format_device(
+            self,
+            label: str, device: str,
+            extra_opt: List[str] = [],
+    ):
         """
         Format a device (e.g. /dev/sda1) with a label.
         """
@@ -247,9 +251,8 @@ class Hardware:
         # because the partition wasn't mounted it's ok, for any other
         # error mkfs will refuse to work anyway.
         subprocess.run(["umount", device], check=False)
-        self.run_cmd_stop_errors([
-            "mkfs.ext4", "-q", "-F", "-L", label, device
-        ])
+        cmd = ["mkfs.ext4", "-q", "-F"] + extra_opt + ["-L", label, device]
+        self.run_cmd_stop_errors(cmd)
         self.run_cmd_stop_errors(["tune2fs", "-c", "0", "-i", "1m", device])
 
 
