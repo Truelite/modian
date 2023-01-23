@@ -109,10 +109,6 @@ def main():
         "-smp", "12",
         "-append", config.get("cmdline"),
         "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
-        "-nic", "tap,id=eth0,model=e1000,mac=52:54:00:00:00:11",
-        "-nic", "bridge,id=eth1,br=br0,model=e1000,mac=52:54:00:00:00:01",
-        "-nic", "tap,id=eth2,model=e1000,mac=52:54:00:00:00:11",
-        "-nic", "bridge,id=eth3,br=br1,model=e1000,mac=52:54:00:00:00:02",
     ]
     for letter in "abcd":
         d_name = "hd"+letter
@@ -120,6 +116,9 @@ def main():
         if d_path:
             cmd.append("-"+d_name)
             cmd.append(d_path)
+    for line in config.get("nic", []):
+        cmd.append("-nic")
+        cmd.append(line)
 
     print("Running command:", " ".join(cmd))
 
