@@ -27,6 +27,9 @@ class InstallCommand:
     ACTIONS_CLASS: Type[actions.Actions] = actions.Actions
 
     def get_parser(self):
+        """
+        Get an argparse.ArgumentParser with all of the required arguments.
+        """
         parser = argparse.ArgumentParser(description=self.DESCRIPTION)
         parser.add_argument(
             "--version",
