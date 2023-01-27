@@ -13,6 +13,7 @@ Welcome to Modian's documentation!
    system_description
    modian-examples/index
    modian-live-wrapper/index
+   pymodian/index
    modian-install/index
 
 
