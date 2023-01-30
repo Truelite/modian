@@ -33,6 +33,10 @@ class Config:
             "kernel": DEFAULT_KERNEL,
             "initrd": DEFAULT_INITRD,
             "cmdline": DEFAULT_CMDLINE,
+            "persistence": "/srv/persistence.qcow2",
+            "persistence_size": None,
+            "persistence_parted":
+                "/etc/modian/partitions/systemdisk-uefi.parted",
             "hda": None,
             "hdb": None,
             "hdc": None,
@@ -67,14 +71,25 @@ def main():
                         help=f"initrd image to boot. Default: {DEFAULT_INITRD}")
     parser.add_argument("--cmdline", action="store",
                         help=f"Kernel command line. Default: {DEFAULT_CMDLINE!r}")
+    parser.add_argument("--persistence", action="store",
+                        help="path to the persistence disk")
+    parser.add_argument("--persistence_size", metavar="SIZE", action="store",
+                        help="path to the persistence disk"
+                        "(either a size in the format used by qemu-img "
+                        "or a percentage of free space)")
+    parser.add_argument("--persistence_parted", action="store",
+                        help="parted schema of the persistence disk")
     parser.add_argument("--hda", metavar="hda", action="store",
-                        help="path to the first disk")
+                        help="path to the first disk (will be ignored if "
+                        "persistence is set)")
     parser.add_argument("--hdb", metavar="hdb", action="store",
                         help="path to the second disk")
     parser.add_argument("--hdc", metavar="hdc", action="store",
                         help="path to the third disk")
     parser.add_argument("--hdd", metavar="hdd", action="store",
                         help="path to the fourth disk")
+    parser.add_argument("--nic", action="append",
+                        help="network configuration passed to qemu")
     args = parser.parse_args()
 
     config = Config(args.config)
@@ -87,6 +102,62 @@ def main():
     if not os.path.exists(iso):
         raise Fail(f"{iso} not found")
 
+    # if the persistence file does not exist, and is not None, we create it
+    # TODO
+    persistence = config.get("persistence")
+    if persistence and not os.path.exists(persistence):
+
+        # file size, accepting a value as percentage of free space
+        p_size = config.get("persistence_size")
+        if p_size.strip.endswith("%"):
+            try:
+                percent = int(p_size[:-1])
+            except ValueError:
+                parser.print_help()
+                exit(1)
+            free_size = shutil.disk_usage(persistence).free
+            p_size = free_size * percent / 100
+
+        # disk creation
+        subprocess.run([
+            "qemu-img",
+            "create",
+            "-f", "qcow2",
+            persistence,
+            p_size,
+        ], check=True)
+
+        # partitioning disk
+        subprocess.run(["modprobe", "nbd", "max_part=8"])
+        subprocess.run(["qemu-nbd", "--connect=/dev/nbd0", "persistence.qcow2"])
+
+        with open(config.get("persistency_parted")) as fp:
+            subprocess.run([
+                "parted",
+                "-s",
+                "-a", "optimal",
+                "/dev/nbd0",
+                "--",
+                fp.read(),
+            ])
+
+        subprocess.run([
+            "mkfs.ext4",
+            "-O^metadata_csum,64bit",
+            "-L", "live-rw",
+            "/dev/nbd0p1"
+        ])
+        subprocess.run(["mkswap", "/dev/nbd0p2"])
+        subprocess.run([
+            "mkfs.ext4",
+            "-O^metadata_csum,64bit",
+            "-L", "##log##",
+            "/dev/nbd0p3"
+        ])
+        subprocess.run(["qemu-nbd", "--disconnect", "/dev/nbd0"])
+        subprocess.run(["rmmod", "nbd"])
+
+    # Prepare to run the image
     kernel = config.get("kernel").replace("$ISO", iso)
     initrd = config.get("initrd").replace("$ISO", iso)
 
@@ -110,7 +181,13 @@ def main():
         "-append", config.get("cmdline"),
         "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
     ]
-    for letter in "abcd":
+    disks = "abcd"
+    persistence = config.get("persistence")
+    if persistence is not None:
+        cmd.append("-hda")
+        cmd.append(persistence)
+        disks = "bcd"
+    for letter in disks:
         d_name = "hd"+letter
         d_path = config.get(d_name)
         if d_path:
