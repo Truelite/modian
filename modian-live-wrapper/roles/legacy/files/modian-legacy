@@ -73,11 +73,11 @@ def main():
                         help=f"Kernel command line. Default: {DEFAULT_CMDLINE!r}")
     parser.add_argument("--persistence", action="store",
                         help="path to the persistence disk")
-    parser.add_argument("--persistence_size", metavar="SIZE", action="store",
+    parser.add_argument("--persistence-size", metavar="SIZE", action="store",
                         help="path to the persistence disk"
                         "(either a size in the format used by qemu-img "
                         "or a percentage of free space)")
-    parser.add_argument("--persistence_parted", action="store",
+    parser.add_argument("--persistence-parted", action="store",
                         help="parted schema of the persistence disk")
     parser.add_argument("--hda", metavar="hda", action="store",
                         help="path to the first disk (will be ignored if "
@@ -109,14 +109,14 @@ def main():
 
         # file size, accepting a value as percentage of free space
         p_size = config.get("persistence_size")
-        if p_size.strip.endswith("%"):
+        if p_size.strip().endswith("%"):
             try:
                 percent = int(p_size[:-1])
             except ValueError:
                 parser.print_help()
                 exit(1)
-            free_size = shutil.disk_usage(persistence).free
-            p_size = free_size * percent / 100
+            free_size = shutil.disk_usage(os.path.dirname(persistence)).free
+            p_size = str(free_size * percent // 100)
 
         # disk creation
         subprocess.run([
@@ -129,17 +129,17 @@ def main():
 
         # partitioning disk
         subprocess.run(["modprobe", "nbd", "max_part=8"])
-        subprocess.run(["qemu-nbd", "--connect=/dev/nbd0", "persistence.qcow2"])
+        subprocess.run(["qemu-nbd", "--connect=/dev/nbd0", persistence])
 
-        with open(config.get("persistency_parted")) as fp:
-            subprocess.run([
+        with open(config.get("persistence_parted")) as fp:
+            cmd = [
                 "parted",
                 "-s",
                 "-a", "optimal",
                 "/dev/nbd0",
                 "--",
-                fp.read(),
-            ])
+            ] + fp.read().split()
+            subprocess.run(cmd)
 
         subprocess.run([
             "mkfs.ext4",
