@@ -1,0 +1,4 @@
+persistence: /srv/persistence.qcow2
+nic:
+  - "tap,id=eth0,model=e1000,mac=52:54:00:00:00:11"
+  - "bridge,id=eth1,br=br0,model=e1000,mac=52:54:00:00:00:01"
