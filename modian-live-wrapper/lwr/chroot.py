@@ -176,10 +176,12 @@ class Chroot(Component):
         Also, due to #895550, systemctl enable cannot currently be done via
         ansible.
         """
+        if self.sysdesc.distribution not in ("buster", "bullseye"):
+            self.run_cmd(["chroot", dest, "apt", "install", "-y", "systemd-resolved"])
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-networkd"])
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-resolved"])
         resolvconf = os.path.join(dest, "etc", "resolv.conf")
-        if os.path.exists(resolvconf):
+        if os.path.lexists(resolvconf):
             os.unlink(resolvconf)
         # delegate resonv.conf to resolved
         os.symlink("/run/systemd/resolve/resolv.conf", resolvconf)
