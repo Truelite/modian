@@ -27,40 +27,6 @@ COLOR_PURPLE=$'\033[0;35m'
 COLOR_PURPLE_LIGHT=$'\033[1;35m'
 COLOR_BROWN=$'\033[0;33m'
 
-# Systemd log level prefixes
-#define SD_EMERG   "<0>"  /* system is unusable */
-#define SD_ALERT   "<1>"  /* action must be taken immediately */
-#define SD_CRIT    "<2>"  /* critical conditions */
-#define SD_ERR	   "<3>"  /* error conditions */
-#define SD_WARNING "<4>"  /* warning conditions */
-#define SD_NOTICE  "<5>"  /* normal but significant condition */
-#define SD_INFO    "<6>"  /* informational */
-#define SD_DEBUG   "<7>"  /* debug-level messages */</pre><p>These prefixes are intended to be used in conjunction with
-
-debug() {
-    echo "<7>$@" >&2
-}
-progress() {
-    echo "<6>$@" >&2
-}
-verbose() {
-    echo "<5>$@" >&2
-}
-warning() {
-    echo "<4>$@" >&2
-}
-error() {
-    echo "<3>$@" >&2
-}
-fail()
-{
-    echo "<2>$@" >&2
-    exit 1
-}
-
-# Read the config.sh (this should really happen in the python command, however)
-. /etc/modian/config.sh
-
 # Print a string centered on the terminal
 display_center()
 {
