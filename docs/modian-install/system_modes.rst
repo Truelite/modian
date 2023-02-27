@@ -51,7 +51,14 @@ start xeyes when the system starts as ``modian-mode-kiosk.target``::
 The file will need to be activated with ``systemctl --user enable
 xeyes.service``, or by manually creating the equivalent symlink.
 
-System services can similarly be ``WantedBy=modian-mode-….target``.
+System services can similarly be ``WantedBy=modian-mode-….target`` and
+they can be enabled via ansible with::
+
+   - name: enable <name> in kiosk mode
+     systemd:
+       name: <name>.service
+       enabled: true
+       masked: no
 
 See also :doc:`grub` to set the systemd target that is run at the
 first boot.
