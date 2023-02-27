@@ -175,9 +175,13 @@ class Chroot(Component):
 
         Also, due to #895550, systemctl enable cannot currently be done via
         ansible.
+
+        Starting from bookworm, it will be enough to install the two
+        packages from ansible, and this method can be removed when
+        removing support for bullseye.
         """
         if self.sysdesc.distribution not in ("buster", "bullseye"):
-            self.run_cmd(["chroot", dest, "apt", "install", "-y", "systemd-resolved"])
+            return
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-networkd"])
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-resolved"])
         resolvconf = os.path.join(dest, "etc", "resolv.conf")
