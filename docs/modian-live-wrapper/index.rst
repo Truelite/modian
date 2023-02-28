@@ -21,6 +21,7 @@ hooks, to cover cases that are beyond Ansible's reach.
    project
    commandline
    ansible
+   roles
    chroot-fixups
    build-directories
    custom-kernels

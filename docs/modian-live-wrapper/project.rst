@@ -11,7 +11,7 @@ A pretty minimal example is available in this repository as
 ``modian-live-example`` and is described in this document.
 
 A more complete example that includes modian features other than
-modian-lwr is documented under :doc:`../modian-full-example/index`.
+modian-lwr is documented under :doc:`../modian-examples/index`.
 
 Directory structure
 ===================

@@ -1,4 +1,7 @@
 */.pybuild/
+*/*.egg-info/
+__pycache__
+
 */debian/.debhelper/
 */debian/debhelper-build-stamp
 */debian/files
@@ -6,7 +9,6 @@
 */debian/*.postrm.debhelper
 */debian/*.prerm.debhelper
 */debian/*.substvars
-*/*.egg-info/
 
 *.deb
 *_amd64.build
@@ -14,3 +16,7 @@
 *.tar.xz
 *_amd64.buildinfo
 *_amd64.changes
+
+local_repo/db/
+local_repo/dists/
+local_repo/old_repo/

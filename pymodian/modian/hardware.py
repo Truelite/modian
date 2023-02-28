@@ -238,18 +238,25 @@ class Hardware:
         self.run_cmd_stop_errors(["partx", "-u", device])
         self.run_cmd_stop_errors(["partx", "-s", device])
 
-    def format_device(self, label: str, device: str):
+    def format_device(
+            self,
+            label: str, device: str,
+            extra_opt: List[str] = [],
+    ):
         """
         Format a device (e.g. /dev/sda1) with a label.
+
+        :param extra_opt: is appended to the options passed to
+                          ``mkfs.ext4`` through subprocess.
+
         """
         log.info("%s: setting up %s partition", device, label)
         # If the partition is mounted we try to umount it; if it fails
         # because the partition wasn't mounted it's ok, for any other
         # error mkfs will refuse to work anyway.
         subprocess.run(["umount", device], check=False)
-        self.run_cmd_stop_errors([
-            "mkfs.ext4", "-q", "-F", "-L", label, device
-        ])
+        cmd = ["mkfs.ext4", "-q", "-F"] + extra_opt + ["-L", label, device]
+        self.run_cmd_stop_errors(cmd)
         self.run_cmd_stop_errors(["tune2fs", "-c", "0", "-i", "1m", device])
 
 
@@ -531,6 +538,7 @@ class System:
             )
             actions.extend(self.compute_firstinstall_actions())
         else:
+            log.info("Detecting existing systems to try and run an upgrade")
             # Check whether the mandatory partitions exist
             missing = []
             if self.LABELS["root"] not in self.partitions:

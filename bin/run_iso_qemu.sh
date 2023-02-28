@@ -8,7 +8,12 @@
 # stop on error
 set -e
 
-ISO=${1:-"dest/modian-full-example.iso"}
+ISO=${1:-"$(ls dest/modian*iso | head -n 1)"}
+
+if [ -z $ISO ] || [ ! -e $ISO ] ; then
+    echo "No such file: $ISO"
+    exit 1
+fi
 
 if [ ! -e live_test.qcow2 ] ; then
     qemu-img create -f qcow2 live_test.qcow2 40G
@@ -20,10 +25,13 @@ else
     echo "bsdtar is not available; under debian it is in the package libarchive-tools"
 fi
 
+# memory allocated to qemu
+QEMU_MEM=${QEMU_MEM:-"2G"}
+
 # we run the iso as if it was an usb device, as cdroms are still not supported
 # by modian-install
 qemu-system-x86_64 \
-    -m 1G \
+    -m $QEMU_MEM \
     -hdc "$ISO" \
     -hda live_test.qcow2 \
     -serial stdio \

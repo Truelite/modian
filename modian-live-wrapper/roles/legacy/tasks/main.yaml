@@ -1,0 +1,99 @@
+---
+  - name: legacy system configuration file
+    copy:
+      src: "{{ legacy_conf }}"
+      dest: /etc/modian/legacy.yaml
+
+  - name: install virtualization packages
+    apt:
+      name: qemu-system-x86,qemu-utils
+      state: present
+
+  - name: install X and a dm to show the virtualized image
+    apt:
+      name: "{{ legacy_host_dm }}"
+      state: present
+
+  - name: install dependencies of the modian-legacy script
+    apt:
+      name: python3-ruamel.yaml
+      state: present
+
+  - name: qemu configuration directory
+    file:
+      path: /etc/qemu
+      state: directory
+
+  - name: qemu bridge whitelist
+    template:
+      src: bridge.conf
+      dest: /etc/qemu/bridge.conf
+      mode: 0640
+
+  - name: prepare the directory for images
+    file:
+      path: /srv/iso
+      state: directory
+
+  - name: get the iso basename
+    set_fact:
+      iso_filename: "{{ legacy_guest_iso | basename }}"
+
+  - name: copy the iso inside the image
+    copy:
+      src: "{{ legacy_guest_iso }}"
+      dest: "/srv/iso/{{ iso_filename }}"
+
+  - name: copy the qemu startup script
+    copy:
+      src: modian-legacy
+      dest: /usr/bin/modian-legacy
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: "Create user unit modian-legacy.target" 
+    copy:
+      src: modian-legacy.target
+      dest: "/lib/systemd/user/modian-legacy.target"
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: "Create user unit modian-legacy.service" 
+    copy:
+      src: modian-legacy.service
+      dest: "/lib/systemd/user/modian-legacy.service"
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: "Enable user unit modian-legacy.service"
+    systemd:
+      name: modian-legacy
+      enabled: yes
+      scope: user
+
+  - name: Make sure /etc/X11 exists
+    file:
+      path: /etc/X11
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: Make sure /etc/X11/Xsession.d exists
+    file:
+      path: /etc/X11/Xsession.d
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: Add Xsession hook
+    copy:
+      src: xsession-hook
+      dest: /etc/X11/Xsession.d/99modian-legacy
+      mode: 0755
+      owner: root
+      group: root

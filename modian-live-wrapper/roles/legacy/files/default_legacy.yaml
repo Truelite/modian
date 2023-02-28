@@ -1,0 +1,11 @@
+# iso: /srv/iso/guest.iso
+# kernel: /srv/iso/guest.iso.kernel
+# initrd: /srv/iso/guest.iso.initrd
+# cmdline: "boot=live config username=root hostname=controller persistent consoleblank=0 --"
+persistence: /srv/persistence.qcow2
+persistence_size: 10G
+nic:
+- "tap,id=eth0,model=e1000,mac=52:54:00:00:00:11"
+- "bridge,id=eth1,br=br0,model=e1000,mac=52:54:00:00:00:01"
+- "tap,id=eth2,model=e1000,mac=52:54:00:00:00:11"
+- "bridge,id=eth3,br=br1,model=e1000,mac=52:54:00:00:00:02"

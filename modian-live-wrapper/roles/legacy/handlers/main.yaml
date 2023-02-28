@@ -1,0 +1,4 @@
+---
+- name: reload udev
+  shell: "true"
+  #shell: "udevadm contro --reload && udevadm trigger --settle --subsystem-match=block"

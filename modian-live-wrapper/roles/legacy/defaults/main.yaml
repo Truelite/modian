@@ -1,0 +1,6 @@
+---
+legacy_host_dm: "xorg,lxde"
+legacy_conf: "default_legacy.yaml"
+legacy_bridges:
+  - name: br0
+  - name: br1
