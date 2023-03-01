@@ -75,7 +75,7 @@ class InstallCommand:
         self.args = self.parser.parse_args()
         self.setup_logging()
 
-        self.env_config = self.read_configuration_from_env()
+        self.env_config = self.read_configuration()
 
         self.hardware = self.HARDWARE_CLASS(env_config=self.env_config)
 
@@ -90,6 +90,24 @@ class InstallCommand:
             hardware=self.hardware,
             env_config=self.env_config,
         )
+
+    def read_configuration(self) -> Config:
+        """
+        Read configuration from files and the environment.
+
+        In the order:
+          * /etc/modian/system.yaml
+          * /data?/modian/system.yaml
+          * /etc/modian/config.yaml
+          * environment (includes variables set in /etc/modian/config.sh)
+        """
+        config = Config()
+        config.load_yaml("/etc/modian/system.yaml")
+        config.load_yaml("/data/modian/system.yaml")
+        config.load_yaml("/etc/modian/config.yaml")
+        config.read_env()
+        config.check()
+        return config
 
     def read_configuration_from_env(self) -> Config:
         return Config(
