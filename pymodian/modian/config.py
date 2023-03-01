@@ -21,9 +21,6 @@ class Config(NamedTuple):
     max_installed_versions: str = "3"
     datadir: str = None
 
-    def __init__(self, *args, **kw):
-        super().__init__(*args, **kw)
-
     def load_yaml(self, fname) -> bool:
         """
         Load values from a yaml file, if available.
