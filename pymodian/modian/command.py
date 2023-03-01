@@ -100,13 +100,21 @@ class InstallCommand:
           * /data?/modian/system.yaml
           * /etc/modian/config.yaml
           * environment (includes variables set in /etc/modian/config.sh)
+        (later sources will override previous ones)
         """
         config = Config()
         config.load_yaml("/etc/modian/system.yaml")
         config.load_yaml("/data/modian/system.yaml")
         config.load_yaml("/etc/modian/config.yaml")
         config.read_env()
-        config.check()
+        missing = config.check()
+        if missing:
+            # TODO: use a good Exception class
+            raise Exception(
+                "Values are missing for configuration fields: {}".format(
+                    ", ".join(missing)
+                )
+            )
         return config
 
     def read_configuration_from_env(self) -> Config:

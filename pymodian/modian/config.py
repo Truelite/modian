@@ -66,15 +66,15 @@ class Config(NamedTuple):
                 res = True
         return res
 
-    def check(self):
+    def check(self) -> list:
+        """
+        Check that all fields are set.
+
+        Returns missing fields.
+        """
         missing = []
         for f in self._fields:
             if getattr(self, f) is None:
                 missing.append(f)
 
-        if missing:
-            raise Exception(
-                "Configuration values are missing for fields: {}".format(
-                    ", ".join(missing)
-                )
-            )
+        return missing
