@@ -96,17 +96,17 @@ class InstallCommand:
         Read configuration from files and the environment.
 
         In the order:
-          * /etc/modian/system.yaml
-          * /data?/modian/system.yaml
           * /etc/modian/config.yaml
+          * extra configuration sources (listed in extra_config in the
+             file above)
           * environment (includes variables set in /etc/modian/config.sh)
         (later sources will override previous ones)
         """
         config = Config()
-        config.load_yaml("/etc/modian/system.yaml")
-        config.load_yaml("/data/modian/system.yaml")
         config.load_yaml("/etc/modian/config.yaml")
-        config.read_env()
+        for conf_file in config.extra_config:
+            config.load_yaml(conf_file)
+        config.load_env()
         missing = config.check()
         if missing:
             # TODO: use a good Exception class

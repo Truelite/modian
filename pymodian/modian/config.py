@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import os
 import socket
 
@@ -8,7 +9,8 @@ from typing import NamedTuple
 import ruamel.yaml
 
 
-class Config(NamedTuple):
+@dataclasses.dataclass
+class Config():
     """
     Runtime configuration for modian-install
     """
@@ -20,6 +22,7 @@ class Config(NamedTuple):
     installed_boot_append: str = ""
     max_installed_versions: str = "3"
     datadir: str = None
+    extra_config: list = dataclasses.field(default_factory=list)
 
     def load_yaml(self, fname) -> bool:
         """
@@ -34,9 +37,9 @@ class Config(NamedTuple):
         yaml = ruamel.yaml.YAML(typ="safe")
         with open(fname, "r") as fp:
             data = yaml.load(fp)
-        for f in self._fields:
-            if data[f]:
-                self.setattr(f, data[f])
+        for f in dataclasses.fields(self):
+            if data.get(f.name, None) is not None:
+                setattr(self, f.name, data[f.name])
                 res = True
         return res
 
@@ -70,8 +73,8 @@ class Config(NamedTuple):
         Returns missing fields.
         """
         missing = []
-        for f in self._fields:
-            if getattr(self, f) is None:
+        for f in dataclasses.fields(self):
+            if getattr(self, f.name) is None:
                 missing.append(f)
 
         return missing

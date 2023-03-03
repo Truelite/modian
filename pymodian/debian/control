@@ -5,13 +5,14 @@ Priority: optional
 Build-Depends: debhelper (>= 12),
                dh-python,
                python3-all,
-               python3-setuptools
+               python3-setuptools,
+               python3-ruamel.yaml,
 Standards-Version: 4.1.5
 Rules-Requires-Root: no
 
 Package: python3-modian
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}, python3-ruamel.yaml
 Recommends: ${python3:Recommends}
 Description: Python support library for Modian
  .
