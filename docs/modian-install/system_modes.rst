@@ -60,5 +60,42 @@ they can be enabled via ansible with::
        enabled: true
        masked: no
 
-See also :doc:`grub` to set the systemd target that is run at the
-first boot.
+Grub Configuration
+==================
+
+To make it easier to change the system mode for the next boot, the grub
+configuration installed by modian adds ``systemd.unit=$start_unit`` to
+the kernel command line, and sets the variable ``start_unit`` earlier to
+the value :doc:`configured <configuration>` as ``systemd_target``.
+
+The script ``/usr/sbin/update_grub_system_modes`` reads the value of
+``systemd_target`` from the modian configuration and updates the
+variable ``systemd.unit`` in the grub configuration.
+
+Note that the script reads the same ``.yaml`` files as
+``modian-install`` and the environment, but it **doesn't** source
+``/etc/modian/config.sh``: to read configuration from it you will have
+to source it yourself in the shell that runs
+``update_grub_system_modes``.
+The recommended solution is to read the grub configuration from a
+``.yaml`` file however, since ``config.sh`` is mostly there for legacy
+reasons.
+
+See also :doc:`grub`.
+
+Troubleshooting
+===============
+
+To verify whether everything is correctly configured, on a running
+modian system:
+
+* the grub configuration in ``/live/image/boot/grub/grub.cfg`` must
+  include the line ``set start_unit=modian-mode-<name>.target`` and the
+  kernel commandline must include ``systemd.unit=$start_unit``;
+* the same should appear in ``/proc/cmdline``
+  ``modian-mode-<name>.target`` ;
+* ``modian-mode-<name>.target`` should appear in the output of the
+  command ``systemctl status "*.target"``;
+* ``modian-mode-<name>.target`` should appear in the output of the
+  command ``systemctl --user status "*.target"`` run as the regular
+  user.
