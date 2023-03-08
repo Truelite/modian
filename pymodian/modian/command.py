@@ -96,10 +96,12 @@ class InstallCommand:
         Read configuration from files and the environment.
 
         In the order:
+
           * /etc/modian/config.yaml
           * extra configuration sources (listed in extra_config in the
              file above)
           * environment (includes variables set in /etc/modian/config.sh)
+
         (later sources will override previous ones)
         """
         config = Config()
