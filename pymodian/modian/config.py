@@ -22,7 +22,7 @@ class Config():
     installed_boot_append: str = ""
     max_installed_versions: str = "3"
     datadir: str = None
-    extra_config: list = dataclasses.field(default_factory=list)
+    extra_config: list[str] = dataclasses.field(default_factory=list)
 
     def load(self) -> bool:
         res = []
@@ -74,7 +74,7 @@ class Config():
                 res = True
         return res
 
-    def check(self) -> list:
+    def check(self) -> list[str]:
         """
         Check that all fields are set.
 
