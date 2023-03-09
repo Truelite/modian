@@ -24,6 +24,14 @@ class Config():
     datadir: str = None
     extra_config: list = dataclasses.field(default_factory=list)
 
+    def load(self) -> bool:
+        res = []
+        res.append(self.load_yaml("/etc/modian/config.yaml"))
+        for conf_file in self.extra_config:
+            res.append(self.load_yaml(conf_file))
+        res.append(self.load_env())
+        return any(res)
+
     def load_yaml(self, fname) -> bool:
         """
         Load values from a yaml file, if available.
@@ -75,6 +83,6 @@ class Config():
         missing = []
         for f in dataclasses.fields(self):
             if getattr(self, f.name) is None:
-                missing.append(f)
+                missing.append(f.name)
 
         return missing

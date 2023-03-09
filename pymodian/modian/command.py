@@ -105,10 +105,7 @@ class InstallCommand:
         (later sources will override previous ones)
         """
         config = Config()
-        config.load_yaml("/etc/modian/config.yaml")
-        for conf_file in config.extra_config:
-            config.load_yaml(conf_file)
-        config.load_env()
+        config.load()
         missing = config.check()
         if missing:
             # TODO: use a good Exception class

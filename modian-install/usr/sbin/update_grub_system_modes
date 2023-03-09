@@ -9,10 +9,7 @@ import modian
 class Cmd:
     def __init__(self):
         self.config = modian.config.Config()
-        self.config.load_yaml("/etc/modian/config.yaml")
-        for conf_file in self.config.extra_config:
-            self.config.load_yaml(conf_file)
-        self.config.load_env()
+        self.config.load()
 
     def main(self):
         grub_cfg = "/live/image/boot/grub/grub.cfg"
