@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import sys
+
+log = logging.getLogger()
+
+
+class VolID:
+    """
+    Manipulate the volume ID of an iso image.
+    """
+
+    ID_POSITION = 0x8028
+    ID_SIZE = 32
+
+    def __init__(self):
+        self.parser = self.get_parser()
+        self.args = self.parser.parse_args()
+        self.setup_logging()
+
+    def get_parser(self):
+        parser = argparse.ArgumentParser(description=self.__doc__)
+        log_group = parser.add_mutually_exclusive_group()
+        log_group.add_argument(
+            "-d", "--debug", action="store_true", help="debugging output"
+        )
+        log_group.add_argument(
+            "-v", "--verbose", action="store_true", help="verbose output"
+        )
+        parser.add_argument(
+            "-f", "--firstinstall",
+            action="store_true",
+            help="Force writing ``firstinstall`` as the volume id",
+        )
+        parser.add_argument(
+            "iso",
+            help="path to the ISO image",
+        )
+        parser.add_argument(
+            "id",
+            help="new volume id; if not present only read the current value",
+            nargs="?",
+            default=None,
+        )
+        return parser
+
+    def setup_logging(self):
+        if self.args.debug:
+            log_level = logging.DEBUG
+        elif self.args.verbose:
+            log_level = logging.INFO
+        else:
+            log_level = logging.WARN
+        logging.basicConfig(
+            level=log_level,
+            stream=sys.stderr,
+            format="%(asctime)s %(levelname)s %(message)s",
+        )
+
+    def read_id(self):
+        try:
+            with open(self.args.iso, "rb") as fp:
+                fp.seek(self.ID_POSITION, 0)
+                vol_id = fp.read(self.ID_SIZE)
+        except FileNotFoundError as e:
+            print("Could not open {}: {}".format(
+                self.args.iso,
+                str(e)
+            ))
+            sys.exit(1)
+        print(vol_id.decode())
+
+    def write_id(self):
+        try:
+            with open(self.args.iso, "rb+") as fp:
+                vol_id = self.args.id.encode()
+                if len(vol_id) > self.ID_SIZE:
+                    vol_id = vol_id[:self.ID_SIZE]
+                    log.warning("id too long, truncated to", vol_id)
+                vol_id = vol_id.ljust(self.ID_SIZE)
+                fp.seek(self.ID_POSITION, 0)
+                fp.write(vol_id)
+        except FileNotFoundError as e:
+            print("Could not open {}: {}".format(
+                self.args.iso,
+                str(e)
+            ))
+            sys.exit(1)
+
+    def main(self):
+        if self.args.firstinstall:
+            self.args.id = "firstinstall"
+        if self.args.id:
+            self.write_id()
+        else:
+            self.read_id()
+
+
+if __name__ == "__main__":
+    try:
+        VolID().main()
+    except Exception as e:
+        log.error("%s", e)
+        raise
+        exit(1)
