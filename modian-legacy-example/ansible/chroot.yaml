@@ -21,3 +21,8 @@
         path: /etc/modian/config.sh
         line: 'export MAX_INSTALLED_VERSIONS=1'
         regexp: 'MAX_INSTALLED_VERSIONS="'
+    - name: make it clear that this is a legacy host system
+      lineinfile:
+        path: /etc/modian/legacy.txt
+        line: "This is a modian legacy host system"
+        create: yes
