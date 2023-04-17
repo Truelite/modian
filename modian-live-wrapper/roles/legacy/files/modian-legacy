@@ -34,7 +34,7 @@ class Config:
             "initrd": DEFAULT_INITRD,
             "cmdline": DEFAULT_CMDLINE,
             "persistence": "/srv/persistence.qcow2",
-            "persistence_size": None,
+            "persistence_size": "75%",
             "persistence_parted":
                 "/etc/modian/partitions/systemdisk-uefi.parted",
             "hda": None,
