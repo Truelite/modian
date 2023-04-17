@@ -33,7 +33,9 @@ class Config:
             "kernel": DEFAULT_KERNEL,
             "initrd": DEFAULT_INITRD,
             "cmdline": DEFAULT_CMDLINE,
-            "persistence": "/srv/persistence.qcow2",
+            "qemu_mem": "12G",
+            "qemu_smp": 12,
+            "persistence": "/srv/iso/persistence.qcow2",
             "persistence_size": "75%",
             "persistence_parted":
                 "/etc/modian/partitions/systemdisk-uefi.parted",
@@ -176,8 +178,8 @@ def main():
         "-kernel", kernel,
         "-initrd", initrd,
         "-cdrom", iso,
-        "-m", "12G",
-        "-smp", "12",
+        "-m", config.get("qemu_mem"),
+        "-smp", config.get("qemu_smp"),
         "-append", config.get("cmdline"),
         "-full-screen", "-vga", "virtio", "-usb", "-device", "usb-tablet",
     ]
