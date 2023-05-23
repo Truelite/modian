@@ -31,9 +31,14 @@
       mode: 0640
 
   - name: prepare the directory for images
+    # the user should be able to write files for the kernel (and by default the
+    # persistence file) in this directory.
     file:
       path: /srv/iso
       state: directory
+      owner: root
+      group: root
+      mode: 0775
 
   - name: get the iso basename
     set_fact:

@@ -1,0 +1,6 @@
+mklabel gpt
+mkpart primary ext4      1M     512M
+mkpart primary ext4     512M   1GiB
+mkpart primary ext4     1GiB -256M
+mkpart primary fat32  -256M    100%
+set 4 esp on
