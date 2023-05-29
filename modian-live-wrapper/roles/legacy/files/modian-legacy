@@ -34,7 +34,7 @@ class Config:
             "initrd": DEFAULT_INITRD,
             "cmdline": DEFAULT_CMDLINE,
             "qemu_mem": "12G",
-            "qemu_smp": 12,
+            "qemu_smp": "12",
             "persistence": "/srv/iso/persistence.qcow2",
             "persistence_size": "75%",
             "persistence_parted":
