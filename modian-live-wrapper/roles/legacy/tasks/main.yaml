@@ -73,11 +73,18 @@
       owner: root
       group: root
 
+  # Enabling the service with become doesn't work, so we create the symlink by
+  # hand.
+  - name: "Check for the systemd unit directories"
+    file:
+      path: "/home/{{ live_user }}/.config/systemd/user/modian-legacy.target.wants/"
+      state: directory
+
   - name: "Enable user unit modian-legacy.service"
-    systemd:
-      name: modian-legacy
-      enabled: yes
-      scope: user
+    file:
+      state: link
+      path: "/home/{{ live_user }}/.config/systemd/user/modian-legacy.target.wants/modian-legacy.service"
+      src: "/usr/lib/systemd/user/modian-legacy.service"
 
   - name: Make sure /etc/X11 exists
     file:
