@@ -180,7 +180,7 @@ class Chroot(Component):
         packages from ansible, and this method can be removed when
         removing support for bullseye.
         """
-        if self.sysdesc.distribution not in ("buster", "bullseye"):
+        if self.sysdesc.distribution not in ("bullseye", ):
             return
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-networkd"])
         self.run_cmd(["chroot", dest, "systemctl", "enable", "systemd-resolved"])

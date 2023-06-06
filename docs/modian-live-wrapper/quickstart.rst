@@ -22,11 +22,11 @@ customised image.
 Changing the Distribution
 -------------------------
 
-By default, the ISO image will be built using the ``buster``
-distribution. If you’d like to build using ``bullseye`` or ``sid`` you can
+By default, the ISO image will be built using the ``trixie``
+distribution. If you’d like to build using ``bookworm`` or ``sid`` you can
 pass the ``-d`` parameter to live-wrapper like so::
 
-   # modian-lwr -d buster
+   # modian-lwr -d bookworm
 
 .. note::
 

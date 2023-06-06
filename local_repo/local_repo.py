@@ -52,8 +52,8 @@ class Repo:
         )
         a_parser.add_argument(
             '--distro', '-d',
-            default='buster',
-            help='target distribution (default: buster)',
+            default='trixie',
+            help='target distribution (default: trixie)',
         )
         a_parser.add_argument(
             '--force', '-f',

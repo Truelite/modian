@@ -1,12 +1,5 @@
 Origin: modian
 Label: modian
-Codename: buster
-Architectures: amd64
-Components: main
-Description: local packages for modian development
-
-Origin: modian
-Label: modian
 Codename: bullseye
 Architectures: amd64
 Components: main

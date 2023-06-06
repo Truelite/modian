@@ -22,9 +22,6 @@ project = 'Modian'
 copyright = '2020, Truelite SRL'
 author = 'Truelite SRL'
 
-# compatibility with sphinx 1.8 on buster
-master_doc = 'index'
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

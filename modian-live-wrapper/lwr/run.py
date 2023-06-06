@@ -85,7 +85,7 @@ class LiveWrapper(Component):
     def add_settings(self, parser):
         default_arch = subprocess.check_output(["dpkg", "--print-architecture"], universal_newlines=True).strip()
         distro = parser.add_argument_group(title="Distribution Settings")
-        distro.add_argument("--distribution", "-d", action="store", metavar="NAME", default="buster",
+        distro.add_argument("--distribution", "-d", action="store", metavar="NAME", default="trixie",
                             help='Debian release to use')
         distro.add_argument("--architecture", action="store", metavar="ARCH", default=default_arch,
                             help='architecture to use')

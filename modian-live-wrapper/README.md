@@ -18,13 +18,13 @@ with the following changes:
 Removed dependency on [vmdebootstrap](https://liw.fi/vmdebootstrap/).
 
 I have integrated and reimplemented `vmdebootstrap`'s functionality in
-`live-wrapper`, so it continues to work on `buster` after `vmdebootstrap` is
-removed.
+`live-wrapper`, so it continues to work on after `vmdebootstrap` has been
+removed from `buster`.
 
 
 ### Ported to python3
 
-`live-wrapper` is now python3 only, and runs on Debian `buster`.
+`live-wrapper` is now python3 only, and runs on Debian `bullseye` and above.
 
 
 ### Chroot customization via Ansible

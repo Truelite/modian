@@ -30,7 +30,7 @@ mkdir -p build/chroot
 $MODIAN_LWR \
     --architecture=amd64 \
     -o ${MLW_DEST}/${MLW_ISO} \
-    --distribution=buster \
+    --distribution=trixie \
     --mirror=${MLW_MIRROR} \
     --apt-mirror=${MLW_MIRROR} \
     --apt-mirror-components="main" \
