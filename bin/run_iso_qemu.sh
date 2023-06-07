@@ -34,6 +34,7 @@ qemu-system-x86_64 \
     -m $QEMU_MEM \
     -hdc "$ISO" \
     -hda live_test.qcow2 \
+    -enable-kvm \
     -serial stdio \
     -kernel live/vmlinuz \
     -initrd live/initrd.img \

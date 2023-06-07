@@ -18,4 +18,6 @@ qemu-system-x86_64 \
     -m $QEMU_MEM \
     -serial stdio \
     -vga cirrus \
+    -cpu host \
+    -enable-kvm \
     -hda live_test.qcow2
