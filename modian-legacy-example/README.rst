@@ -11,3 +11,8 @@ one of the modian-full-example-*), and point to it in the variable
 relative to the directory ``ansible``).
 
 The legacy iso will be included in the generated iso.
+
+To run the installed host system under qemu with the
+``../bin/run_installed_qemu.sh`` script you should set the environment
+variable ``QEMU_MEM=4G`` to have enough ram in the virtualized host to
+run the guest.
