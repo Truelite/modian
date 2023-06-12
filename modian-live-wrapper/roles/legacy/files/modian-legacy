@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
+import logging
 import os
 import shutil
 import subprocess
@@ -13,6 +14,8 @@ DEFAULT_ISO = "/srv/iso/guest.iso"
 DEFAULT_KERNEL = "$ISO.kernel"
 DEFAULT_INITRD = "$ISO.initrd"
 DEFAULT_CMDLINE = "boot=live config username=root hostname=controller persistent consoleblank=0 --"
+
+log = logging.getLogger()
 
 
 class Fail(Exception):
@@ -92,11 +95,28 @@ def main():
                         help="path to the fourth disk")
     parser.add_argument("--nic", action="append",
                         help="network configuration passed to qemu")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="print info messages")
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="print debug messages")
     args = parser.parse_args()
 
     config = Config(args.config)
     config.read_file()
     config.read_args(args)
+
+    if args.debug:
+        log_level = logging.DEBUG
+    elif args.verbose:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARN
+
+    logging.basicConfig(
+        level=log_level,
+        stream=sys.stderr,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
 
     kvm = shutil.which("kvm")
 
@@ -108,6 +128,8 @@ def main():
     # TODO
     persistence = config.get("persistence")
     if persistence and not os.path.exists(persistence):
+
+        log.info("Creating persistence file")
 
         # file size, accepting a value as percentage of free space
         p_size = config.get("persistence_size")
@@ -121,6 +143,7 @@ def main():
             p_size = str(free_size * percent // 100)
 
         # disk creation
+        log.info("Creating disk image")
         subprocess.run([
             "qemu-img",
             "create",
@@ -130,6 +153,7 @@ def main():
         ], check=True)
 
         # partitioning disk
+        log.info("Partitioning disk")
         subprocess.run(["modprobe", "nbd", "max_part=8"])
         subprocess.run(["qemu-nbd", "--connect=/dev/nbd0", persistence])
 
@@ -143,6 +167,7 @@ def main():
             ] + fp.read().split()
             subprocess.run(cmd)
 
+        log.info("Formatting partitions")
         subprocess.run([
             "mkfs.ext4",
             "-O^metadata_csum,64bit",
@@ -159,6 +184,7 @@ def main():
         subprocess.run(["qemu-nbd", "--disconnect", "/dev/nbd0"])
         subprocess.run(["rmmod", "nbd"])
 
+    log.info("Preparing to run the image")
     # Prepare to run the image
     kernel = config.get("kernel").replace("$ISO", iso)
     initrd = config.get("initrd").replace("$ISO", iso)
@@ -199,7 +225,7 @@ def main():
         cmd.append("-nic")
         cmd.append(line)
 
-    print("Running command:", " ".join(cmd))
+    log.info("Launching image; command is: %s", " ".join(cmd))
 
     os.execvp(kvm, cmd)
 
