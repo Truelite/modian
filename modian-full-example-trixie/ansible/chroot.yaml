@@ -1,0 +1,40 @@
+---
+- hosts: all
+  roles:
+    # live and modian roles from the common modian-live-wrapper roles
+    - live
+    - modian
+    # our custom role, defined here
+    - full_example
+    # live role from the common modian-live-wrapper roles
+    - live
+    - modian-system-modes
+  tasks:
+    - name: set the modian release name
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MODIAN_RELEASE_NAME="0.1"'
+        regexp: 'MODIAN_RELEASE_NAME="'
+    - name: set the modian release full name
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MODIAN_RELEASE_FULL_NAME="0.1.0"'
+        regexp: 'MODIAN_RELEASE_FULL_NAME="'
+    - name: raise the number of versions kept
+      lineinfile:
+        path: /etc/modian/config.sh
+        line: 'export MAX_INSTALLED_VERSIONS=4'
+        regexp: 'MAX_INSTALLED_VERSIONS="'
+    # If you need to use systemd-resolved on the installed image it has to be
+    # one of the last things you do via ansible, as it breaks apt's network
+    # access.
+    - name: install systemd-resolved
+      apt:
+        name: systemd-resolved
+        state: present
+    # systemd-networkd can be enabled also elsewhere, but it's required by
+    # systemd-resolved, so it can just be done nearby.
+    - name: enable systemd-networkd
+      service:
+        name: systemd-networkd
+        enabled: true

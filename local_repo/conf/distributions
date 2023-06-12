@@ -11,3 +11,10 @@ Codename: bookworm
 Architectures: amd64
 Components: main
 Description: local packages for modian development
+
+Origin: modian
+Label: modian
+Codename: trixie
+Architectures: amd64
+Components: main
+Description: local packages for modian development
