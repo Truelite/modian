@@ -13,7 +13,7 @@ MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
 MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-modian-legacy-example}
 MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Legacy Runner"}
 MLW_EXTRA_VARS=${MLW_EXTRA_VARS:-ansible/extra_vars.yaml}
-MLW_RELEASE=${MLW_RELEASE:-bookworm}
+MLW_RELEASE=${MLW_RELEASE:-trixie}
 
 MODIAN_LWR=${MODIAN_LWR:-modian-lwr}
 
