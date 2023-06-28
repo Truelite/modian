@@ -3,12 +3,15 @@
 ********************
 
 Grub on the *installed* system can be configured by setting the
-following two variables in ``/etc/modian/config.sh``:
+following two variables in one of the files read by the
+:doc:`configuration`:
 
-``SYSTEMD_TARGET``
+``systemd_target``
    the default target to reach at the first boot, default is
-   ``default.target``;
-``INSTALLED_BOOT_APPEND``
+   ``default.target``: note that this should be set in a ``.yaml`` file
+   rather than ``config.sh``, so that the ``update_grub_system_modes``
+   script has easier access to i;
+``installed_boot_append``
    additional parameters to pass to the kernel commandline.
 
 These values can be set via the ansible playbook that is used to
