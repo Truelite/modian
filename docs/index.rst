@@ -15,6 +15,7 @@ Welcome to Modian's documentation!
    modian-live-wrapper/index
    pymodian/index
    modian-install/index
+   tutorial/index
 
 
 
