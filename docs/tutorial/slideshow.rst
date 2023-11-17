@@ -111,7 +111,41 @@ then we prepare the system to mount a filesystem with the label
        fstype: auto
        opts: ro,noexec,nofail,x-systemd.device-timeout=10
 
-impressive -g 800x600 -a 2 -w /srv/slides/
+and finally we copy and enable a systemd user unit that runs impressive
+at the login of any user::
+
+   - name: user service to run impressive at start
+     copy:
+       src: slideshow.service
+       dest: /etc/systemd/user/slideshow.service
+   - name: directory for the enabling symlink
+     file:
+       path: /etc/systemd/user/default.target.wants/
+       state: directory
+   - name: enable the impressive service
+     file:
+       path: /etc/systemd/user/default.target.wants/slideshow.service
+       src: /etc/systemd/user/slideshow.service
+       state: link
+
+
+``ansible/roles/slideshow/files/slideshow.service``
+---------------------------------------------------
+
+Of course, the playbook above requires the actual systemd unit file::
+
+   [Unit]
+   Description=Run a slideshow
+   After=multi-user.target srv-slides.mount
+
+   [Service]
+   ExecStart=/usr/bin/impressive -g 800x600 -a 4 -w /srv/slides/
+
+   [Install]
+   WantedBy=default.target
+
+The resolution of 800×600 is used for convenience when running this iso
+in qemu in a window.
 
 ``customize/iso.sh``
 --------------------
@@ -155,7 +189,7 @@ variables in a way that makes them easy to override::
 
    MLW_DEST=${MLW_DEST:-dest}
    MLW_ISO=${MLW_ISO:-slideshow.iso}
-   MLW_MIRROR=${MLW_MIRROR:-https://deb.debian.org/debian}
+   MLW_MIRROR=${MLW_MIRROR:-http://deb.debian.org/debian}
    MLW_ISO_VOLUME=${MLW_ISO_VOLUME:-slideshow}
    MLW_DESCRIPTION=${MLW_DESCRIPTION:-"Modian Full Example"}
    MLW_EXTRA_VARS=${MLW_EXTRA_VARS:-ansible/extra_vars.yaml}
@@ -191,12 +225,89 @@ and finally modian-lwn is run::
        --work-dir="build" \
        --no-installer  |& tee -a $FILELOG
 
-
 Building
 ========
+
+To build the image it is enough to run the ``build_image`` script as
+superuser::
+
+   sudo ./build_image
+
+or, if modian has not been installed in the system path::
+
+   sudo MODIAN_LWR=path/to/modian/modian-live-wrapper/lwr.py ./build_image
+
+after some time this will create an iso image ``dest/slideshow.iso``
+that can be copied to a bootable device and run on real hardware, or run
+in qemu by running the conveniente script from modian::
+
+   path/to/modian/bin/run_iso_qemu.sh dest/slideshow.iso
+
+Running the installed image requires an additional partition with the
+label ``##slides##`` and some pictures: for real hardware this will
+probably be on an usb stick, while for qemu you can use the following
+commands to create a disk image and connect it via nbd::
+
+   qemu-img create -f qcow2 slides.qcow2 1G
+   sudo modprobe nbd max_part=8
+   sudo qemu-nbd -c /dev/nbd0 slides.qcow2
+
+then create the partition using your favourite tool such as::
+
+   sudo parted /dev/nbd0
+
+format it with one of the two following commands::
+
+   sudo mkfs.vfat -L "##slides##" /dev/nbd0p1
+
+or::
+
+   sudo mkfs.ext4 -L "##slides##" /dev/nbd0p1
+
+and then you can mount the partition and fill it with images::
+
+   mkdir mnt
+   sudo mount /dev/nbd0p1 mnt/
+   sudo cp path/to/file.jpg path/to/another/file.png [...] mnt/
+   sudo umount mnt/
+   sudo qemu-nbd -d /dev/nbd0
+
+.. tip::
+
+   if you have already formatted the partition and only want to add more
+   files you can also use::
+
+      guestmount -a slides.qcow2 -m /dev/sda1 --rw mnt/
+
+   to mount it (as a regular user) without having to connect the device
+   via nbd first.
+
+You can then run the installed system in qemu using the following
+script::
+
+   #!/bin/sh
+
+   # Run the installed image live_test.qcow2 inside qemu.
+
+   # stop on error
+   set -e
+
+   # memory allocated to qemu
+   QEMU_MEM=${QEMU_MEM:-"2G"}
+
+   qemu-system-x86_64 \
+       -m $QEMU_MEM \
+       -serial stdio \
+       -vga cirrus \
+       -cpu host \
+       -enable-kvm \
+       -hda live_test.qcow2 \
+       -hdc slides.qcow2
+
 
 Exercises
 =========
 
-The program used to show the slideshow, impressive, is able to show
-images 
+The program used to show the slideshow, impressive, is not only able to
+show image files, but also pdf and video: adding the required
+dependencies to the image should be an easy exercise.
