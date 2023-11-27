@@ -8,13 +8,13 @@ support for monolithic updates and reverts.
 License
 =======
 
-Copyright (c) 2020-2021 Truelite s.r.l.
+Copyright (c) 2020-2023 Truelite s.r.l.
 
 modian-live-wrapper Copyright
 
    | 2015 Iain R. Learmonth
    | 2018-2020 Enrico Zini
-   | 2020-2021 Truelite SRL
+   | 2020-2023 Truelite SRL
 
 All rights reserved.
 
