@@ -1,0 +1,5 @@
+---
+ - name: install a few useful packages for troubleshooting
+   apt:
+     name: lsof,vim,strace
+     state: present

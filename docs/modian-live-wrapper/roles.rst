@@ -51,3 +51,11 @@ The latter can have the following contents:
   ignored if ``persistence`` is present;
 * ``nic``, a list of strings that will be passed as ``--nic`` options to
   qemu, to configure the network.
+
+``debug``
+=========
+
+Installs a few packages that are useful to troubleshoot problems.
+
+This role is designed to be temporarily added to ``chroot.yaml`` while
+developing, and removed before building the final image.
