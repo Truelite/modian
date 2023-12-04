@@ -221,7 +221,11 @@ class Hardware:
             device, recipe
         )
 
-        log.info("Partitioning disk %s", device)
+        log.info(
+            "Partitioning disk %s with recipe %s",
+            device,
+            partition_table_recipe,
+        )
 
         with open(partition_table_recipe, "r") as fp:
             for line in fp:
