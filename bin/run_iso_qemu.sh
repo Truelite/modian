@@ -30,6 +30,11 @@ QEMU_MEM=${QEMU_MEM:-"2G"}
 
 # we run the iso as if it was an usb device, as cdroms are still not supported
 # by modian-install
+#
+# by default qemu uses a legacy bios; adding the following option uses UEFI
+# instead (requires the ovmf package to be installed):
+#   -bios /usr/share/ovmf/OVMF.fd \
+
 qemu-system-x86_64 \
     -m $QEMU_MEM \
     -hdc "$ISO" \

@@ -13,7 +13,11 @@ QEMU_MEM=${QEMU_MEM:-"2G"}
 # live-media-path=live-0.1 consoleblank=0 console=ttyS0 printk.devkmsg=on" to
 # keep the script generic, you can press [tab] at the bootloader menu and
 # simply add the following options manually: console=ttyS0 printk.devkmsg=on
-echo "running qemu"
+#
+# by default qemu uses a legacy bios; adding the following option uses UEFI
+# instead (requires the ovmf package to be installed):
+#   -bios /usr/share/ovmf/OVMF.fd \
+
 qemu-system-x86_64 \
     -m $QEMU_MEM \
     -serial stdio \
