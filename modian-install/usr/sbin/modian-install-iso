@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import logging
 import subprocess
 import gzip
@@ -185,6 +186,10 @@ class Installer:
             subprocess.run(["sync"], check=True)
             with open("install-successful", "wb"):
                 pass
+            with open("../modian.log", "a") as fp:
+                fp.write("{} - installation successful".format(
+                    datetime.datetime.now().isoformat()
+                ))
             subprocess.run(["sync"], check=True)
 
     def rollback(self):
