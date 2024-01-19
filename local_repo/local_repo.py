@@ -67,6 +67,17 @@ class Repo:
         )
         a_parser.set_defaults(func=self.add_deb)
 
+        # Remove
+        r_parser = subparsers.add_parser(
+            'remove',
+            help=_get_first_docstring_line(self.remove),
+        )
+        r_parser.add_argument(
+            'package',
+            help='package to remove',
+        )
+        r_parser.set_defaults(func=self.remove)
+
         # Serve
         s_parser = subparsers.add_parser(
             'serve',
@@ -103,6 +114,38 @@ class Repo:
             os.path.join(scriptdir, 'conf/options'),
             os.path.join(confdir, 'options'),
         )
+
+    def remove(self, args):
+        """
+        Remove a package from all distributions
+        """
+        os.chdir(args.directory)
+        codenames = []
+        res = subprocess.run(
+            [
+                'reprepro',
+                '-b', '.',
+                'ls',
+                args.package,
+            ],
+            capture_output=True,
+        )
+        for lin in res.stdout.decode().split("\n"):
+            try:
+                cn = lin.split("|")[2].strip()
+                codenames.append(cn)
+            except IndexError:
+                pass
+        for cn in codenames:
+            subprocess.run(
+                [
+                    'reprepro',
+                    '-b', '.',
+                    'remove',
+                    cn,
+                    args.package,
+                ]
+            )
 
     def add_deb(self, args):
         """
