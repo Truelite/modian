@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import subprocess
+import sys
+
+
+class Persistence:
+
+    def get_parser(self):
+        parser = argparse.ArgumentParser(
+            description="Increase the size of a persistence file by 1GB",
+            epilog="This script can be run on a live persistence.",
+        )
+        parser.add_argument("persistence")
+        return parser
+
+    def run_cmd_exit_if_failure(self, cmd):
+        res = subprocess.run(cmd)
+        if res.returncode != 0:
+            sys.exit(res.returncode)
+
+    def main(self):
+        parser = self.get_parser()
+        args = parser.parse_args()
+        if not os.path.exists(args.persistence):
+            print("No such file", args.persistence)
+            parser.print_help()
+
+        size = os.path.getsize(args.persistence)
+
+        # add 1 GiB to the size
+        size += 1024 * 1024 * 1024
+
+        res = subprocess.run('losetup', capture_output=True)
+        device = None
+        for line in res.stdout.decode().split('\n'):
+            if args.persistence in line:
+                device = line.split()[0]
+
+        if not device:
+            print("Could not find a loop device corresponding to the "
+                  "persistence file: is it mounted?")
+            sys.exit(1)
+
+        self.run_cmd_exit_if_failure(
+            ["fallocate", "-l", str(size), args.persistence]
+        )
+        self.run_cmd_exit_if_failure(["losetup", "-c", device])
+        self.run_cmd_exit_if_failure(["resize2fs", device])
+
+
+if __name__ == "__main__":
+    Persistence().main()
