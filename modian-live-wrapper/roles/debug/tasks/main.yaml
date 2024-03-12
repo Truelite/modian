@@ -1,5 +1,9 @@
 ---
  - name: install a few useful packages for troubleshooting
    apt:
-     name: lsof,vim,strace
+     name: lsof,strace,file,man-db,live-boot-doc
+     state: present
+ - name: install a few convenience packages
+   apt:
+     name: vim,screen
      state: present
