@@ -1,0 +1,16 @@
+Source: modian-live-boot-patches
+Section: admin
+Priority: optional
+Maintainer: Truelite team <packages@truelite.it>
+Build-Depends:
+ debhelper-compat (= 12)
+Standards-Version: 4.5.1
+Rules-Requires-Root: no
+
+Package: modian-live-boot-patches
+Priority: required
+Architecture: all
+Depends: ${misc:Depends}, live-boot
+Description: Modian patches for live-boot
+ This package contains a patch for live-boot to support mounting a persistence
+ file that is stored beside the live image.

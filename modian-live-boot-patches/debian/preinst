@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "install" ] || [ "$1" = "upgrade" ]
+then
+    mkdir -p /lib/live/boot.orig
+    dpkg-divert --package modian-live-boot-patches --divert /lib/live/boot.orig/9990-misc-helpers.sh --rename /lib/live/boot/9990-misc-helpers.sh
+fi
+
+#DEBHELPER
