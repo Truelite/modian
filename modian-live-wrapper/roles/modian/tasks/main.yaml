@@ -1,9 +1,22 @@
 ---
-- name: Add the modian repository
-  apt_repository:
-    repo: 'deb {{ modian_repo }} {{ distribution }} main'
-    state: present
-- name: Install modian packages
-  apt:
-    name: modian-install,python3-modian
-    state: present
+- name: Install modian packages, adding the repo if needed
+  block:
+    - name: Add the modian repository key, if needed
+      copy:
+        src: "{{ modian_repo_key }}"
+        dest: "/usr/share/keyrings/{{ modian_repo_key }}"
+      when: modian_repo_key is defined and modian_repo_key
+    - name: Add the modian repository
+      apt_repository:
+        repo: 'deb {{ modian_repo }} {{ distribution }} main'
+        state: present
+      when: modian_repo is defined and modian_repo
+    - name: Install modian packages
+      apt:
+        name: modian-install,python3-modian
+        state: present
+  rescue:
+    - name: Fail with an explanation
+      fail:
+        msg: "We could not install the modian packages; the reason may be that the variable modian_repo is not set or is set to false: please set it to a repository that includes the modian packages, or configure such a repository in some other way in a role that runs before the modian role."
+      when: modian_repo is not defined or not modian_repo
