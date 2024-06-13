@@ -26,3 +26,6 @@
       fail:
         msg: "We could not install the modian packages; the reason may be that the variable modian_repo is not set or is set to false: please set it to a repository that includes the modian packages, or configure such a repository in some other way in a role that runs before the modian role."
       when: modian_repo is not defined or not modian_repo
+    - name: Fail
+      fail:
+        msg: "We could not install the modian packages: see the error messages above for details."
