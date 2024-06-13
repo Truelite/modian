@@ -3,12 +3,6 @@
    apt:
      name: live-boot,live-config,acpid
      state: present
- - name: install patches for live boot
-   apt:
-     name: modian-live-boot-patches
-     state: present
-   when: ansible_distribution_release == "bookworm" or
-         ansible_distribution_release == "trixie"
  - name: blacklist bochs-drm
    copy:
      dest: /etc/modprobe.d/qemu-bochs-drm-blacklist.conf

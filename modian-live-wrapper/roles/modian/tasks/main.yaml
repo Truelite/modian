@@ -15,6 +15,12 @@
       apt:
         name: modian-install,python3-modian
         state: present
+    - name: install patches for live boot
+      apt:
+        name: modian-live-boot-patches
+        state: present
+      when: ansible_distribution_release == "bookworm" or
+            ansible_distribution_release == "trixie"
   rescue:
     - name: Fail with an explanation
       fail:
