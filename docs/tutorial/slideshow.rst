@@ -74,11 +74,14 @@ playbook; here we will setup two variables that are needed by modian::
 ---------------------------
 
 This is a file with variables that will be passed to ansible; other than
-what is used in your own roles you need to set a value for
-``modian_repo`` to somewhere the modian packages can be installed from;
-if using ``local_repo`` to serve them locally you can use::
+what is used in your own roles you need to set a value for the
+``modian_repo_*`` variables to somewhere the modian packages can be
+installed from; if using ``local_repo`` to serve them locally you can
+use::
 
-   modian_repo: '[trusted=yes] http://localhost:8099/'
+   modian_repo_uris: "http://localhost:8099/"
+   modian_repo_trusted: true
+   modian_repo_suites: trixie
 
 ``ansible/roles``
 -----------------

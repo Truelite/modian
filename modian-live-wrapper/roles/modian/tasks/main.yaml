@@ -1,6 +1,29 @@
 ---
+- name: Install ansible dependency
+  apt:
+    name: python3-debian
+    state: present
 - name: Install modian packages, adding the repo if needed
   block:
+    - name: Add the modian repo
+      deb822_repository:
+        name: modian
+        types: deb
+        uris: "{{ modian_repo_uris }}"
+        suites: "{{ modian_repo_suites }}"
+        trusted: true
+        components:
+          - main
+      when: modian_repo_uris is defined and modian_repo_uris and modian_repo_trusted
+    - name: Add the modian repo
+      deb822_repository:
+        name: modian
+        types: deb
+        uris: "{{ modian_repo_uris }}"
+        components:
+          - main
+        signed-by: "{{ modian_repo_key }}"
+      when: modian_repo_uris is defined and modian_repo_uris and not modian_repo_trusted
     - name: Add the modian repository key, if needed
       copy:
         src: "{{ modian_repo_key }}"
@@ -15,6 +38,7 @@
       apt:
         name: modian-install,python3-modian
         state: present
+        update_cache: true
     - name: install patches for live boot
       apt:
         name: modian-live-boot-patches

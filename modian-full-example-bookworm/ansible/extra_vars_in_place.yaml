@@ -1,5 +1,8 @@
 # Get modian packages from a repository served by ``./local_repo.py serve``
-modian_repo: '[trusted=yes] http://localhost:8099/'
+#modian_repo: '[trusted=yes] http://localhost:8099/'
+modian_repo_uris: "http://localhost:8099/"
+modian_repo_trusted: true
+modian_repo_suites: bookworm
 modian_system_modes:
  - name: kiosk
    description: Locked down kiosk mode
