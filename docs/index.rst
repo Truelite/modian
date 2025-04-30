@@ -11,6 +11,7 @@ Welcome to Modian's documentation!
    :caption: Contents:
 
    system_description
+   requirements
    modian-examples/index
    modian-live-wrapper/index
    pymodian/index
