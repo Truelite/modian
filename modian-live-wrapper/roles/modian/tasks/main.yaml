@@ -14,7 +14,7 @@
         trusted: true
         components:
           - main
-      when: modian_repo_uris is defined and modian_repo_uris and modian_repo_trusted
+      when: modian_repo_uris is defined and modian_repo_uris | length > 0 and modian_repo_trusted
     - name: Add the modian repo
       deb822_repository:
         name: modian
@@ -23,17 +23,17 @@
         components:
           - main
         signed-by: "{{ modian_repo_key }}"
-      when: modian_repo_uris is defined and modian_repo_uris and not modian_repo_trusted
+      when: modian_repo_uris is defined and modian_repo_uris | length > 0 and not modian_repo_trusted
     - name: Add the modian repository key, if needed
       copy:
         src: "{{ modian_repo_key }}"
         dest: "/usr/share/keyrings/{{ modian_repo_key }}"
-      when: modian_repo_key is defined and modian_repo_key
+      when: modian_repo_key is defined and modian_repo_key | length > 0
     - name: Add the modian repository
       apt_repository:
         repo: 'deb {{ modian_repo }} {{ distribution }} main'
         state: present
-      when: modian_repo is defined and modian_repo
+      when: modian_repo is defined and modian_repo | length > 0
     - name: Install modian packages
       apt:
         name: modian-install,python3-modian

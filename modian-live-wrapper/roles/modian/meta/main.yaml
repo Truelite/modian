@@ -1,4 +1,4 @@
 ---
 dependencies:
     - role: modian-system-modes
-      when: modian_system_modes is defined and modian_system_modes
+      when: modian_system_modes is defined and modian_system_modes | length > 0
